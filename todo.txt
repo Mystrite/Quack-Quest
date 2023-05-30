@@ -1,0 +1,4 @@
+TO DO:
+-rewrite WFC code using probability matrix and recursion.
+	-Add tile types (DONE? - might be more to add)
+	-Need to do recursive generation now.
