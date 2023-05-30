@@ -1,6 +1,7 @@
 TO DO:
 -rewrite WFC code using probability matrix and recursion.
 	-Add tile types (DONE? - might be more to add)
-	-Need to do recursive generation now.
+	-Need to do recursive generation now. (WORKS??)
+	-Easy idea to prevent exit/entrance blocking -> start generation from exits/entrances
 -for textures:
 	- preset void could literally just be black, i think that would be pretty cool.
