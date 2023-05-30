@@ -36,7 +36,8 @@ prob_matrix = [
     [0.80,      0,          0.005,      0.005,      0.1,        0,      0,      0,      0],     # N_VOID
     [0.70,      0,          0,          0,          0.3,        0,      0,      0,      0],     # P_VOID
     [0,         0,          0,          0,          0,          0,      0,      0,      0],     # EXIT
-    [0,         0,          0,          0,          0,          0,      0,      0,      0]      # ENTRANCE
+    [0,         0,          0,          0,          0,          0,      0,      0,      0],     # ENTRANCE
+    [0.90,      0.03,       0.005,      0.04,       0.025,      0,      0,      0,      0]      # NONE
     ]
 
 def init_grid(xlen, ylen):      #create 2d array which holds map tiles
@@ -56,7 +57,7 @@ def rand_select(matrix, adj_ID):        #select a tile type, given a tile next t
     selected_ID = 0
     i = -1
     sum = 0 
-    while selected == False and i < len(TILE_ID):
+    while selected == False and i+1 < len(TILE_ID):
         i += 1
         sum += matrix[adj_ID][i]
         if randnum < sum:
@@ -65,7 +66,16 @@ def rand_select(matrix, adj_ID):        #select a tile type, given a tile next t
     
     return selected_ID
      
-
+def populate_grid(grid, x, y, ID):      #populate given grid
+    if (x < SIZE_X and y < SIZE_Y and x >= 0 and y >= 0) and (grid[y][x] == TILE_ID["NONE"]):
+        # generate tile
+        newID = rand_select(prob_matrix, ID)
+        grid[y][x] = newID
+        grid = populate_grid(grid,x+1, y, newID)
+        grid = populate_grid(grid,x-1, y, newID)
+        grid = populate_grid(grid,x, y+1, newID)
+        grid = populate_grid(grid,x, y-1, newID)
+    return grid
 
 def main():
     global maptiles
@@ -73,8 +83,11 @@ def main():
     global SIZE_Y
     global prob_matrix
 
-    maptiles = init_grid(SIZE_X, SIZE_Y)
-    outgrid(maptiles, SIZE_X, SIZE_Y)
+    maptiles = init_grid(SIZE_X, SIZE_Y)        # to be rewritten, mostly output test
+    outgrid(maptiles, SIZE_X, SIZE_Y)             
+    newgrid = populate_grid(maptiles, 0, 0, 8)
+    print()
+    outgrid(newgrid, SIZE_X, SIZE_Y)
 
 main()
 
