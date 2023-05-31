@@ -3,5 +3,7 @@ TO DO:
 	-Add tile types (DONE? - might be more to add)
 	-Need to do recursive generation now. (WORKS??)
 	-Easy idea to prevent exit/entrance blocking -> start generation from exits/entrances
+	-an N number of rooms should be preloaded at the start, probably the best way to do this. 
+	-implement some idea of preset rooms?
 -for textures:
 	- preset void could literally just be black, i think that would be pretty cool.
