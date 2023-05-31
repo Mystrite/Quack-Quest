@@ -13,6 +13,8 @@ TILE ID:
 
 import random as r
 
+############ VALUE PRESETS BEGIN ############
+
 TILE_ID = {
     "FLOOR": 0,
     "LAVA": 1,
@@ -42,6 +44,18 @@ prob_matrix = [
     [0,         0,          0,          0,          0,          0,      0,      0,      0,      0]          # O_WALL
     ]
 
+############ VALUE PRESETS END ############
+
+############ GENERAL FUNCS BEGIN ############
+
+def outgrid(grid, width, height):       #output a given 2D array
+    for y in range(height):
+        outstr = ""
+        for x in range(width):
+            outstr += str(grid[y][x])
+        print(outstr)
+
+############ GENERAL FUNCS END ############
 
 ############ MAP GEN FUNCS BEGIN ############
 def init_grid(xlen, ylen):      #create 2d array which holds map tiles
@@ -59,12 +73,6 @@ def init_grid(xlen, ylen):      #create 2d array which holds map tiles
                 maptiles[y][x] = TILE_ID["O_WALL"]
     return maptiles, exit_index
 
-def outgrid(grid, width, height):       #output a given 2D array
-    for y in range(height):
-        outstr = ""
-        for x in range(width):
-            outstr += str(grid[y][x])
-        print(outstr)
 
 def rand_select(matrix, adj_ID):        #select a tile type, given a tile next to it and a probability matrix
     randnum = r.randint(0,1000) / 1000
