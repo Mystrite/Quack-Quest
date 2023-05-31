@@ -7,5 +7,8 @@ TO DO:
 	-implement some idea of preset rooms?
 -2d array that handles entities
 
+ISSUES:
+	- converts O_WALL into floor tile, directly below exit ?? looks like issue with manual assign - was issue with recursion, should be fixed now
+
 -for textures:
 	- preset void could literally just be black, i think that would be pretty cool.
