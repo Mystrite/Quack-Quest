@@ -14,19 +14,19 @@ TILE_ID = {
     "O_WALL": 8
 }
 
-SIZE_X = 18
-SIZE_Y = 8
-prob_matrix = [
-   # FLOOR      LAVA        HOLY        ROCK        VOID       EXIT    ENTER   NONE    O_WALL     
-    [0.7,       0.1,        0.005,      0.14,       0.028,     0,      0,      0,      0],         # FLOOR
-    [0.5,       0.45,       0,          0.05,       0,         0,      0,      0,      0],         # LAVA
-    [0.65,      0,          0.3,        0.05,       0,         0,      0,      0,      0],         # HOLY
-    [0.75,      0.1,        0.05,       0.05,       0.05,      0,      0,      0,      0],         # ROCK
-    [0.6,       0,          0.005,      0.005,      0.3,       0,      0,      0,      0],         # VOID
-    [1,         0,          0,          0,          0,         0,      0,      0,      0],         # EXIT
-    [1,         0,          0,          0,          0,         0,      0,      0,      0],         # ENTRANCE
-    [0.9,       0.03,       0.005,      0.04,       0.025,     0,      0,      0,      0],         # NONE
-    [0,         0,          0,          0,          0,         0,      0,      0,      0]          # O_WALL
+SIZE_X = 25
+SIZE_Y = 16
+weight_matrix = [
+   # FLOOR      LAVA        HOLY        ROCK        VOID      EXIT    ENTER   NONE    O_WALL        MATRIX OF TILE WEIGHTINGS, -1 = CANNOT GENERATE
+    [500,       100,          0,        100,        100,      -1,     -1,     -1,     -1],         # FLOOR
+    [0,         350,         -1,        150,        150,      -1,     -1,     -1,     -1],         # LAVA
+    [100,        -1,        125,        175,        100,      -1,     -1,     -1,     -1],         # HOLY
+    [180,       200,         25,        250,         50,      -1,     -1,     -1,     -1],         # ROCK
+    [350,        50,         25,         25,        300,      -1,     -1,     -1,     -1],         # VOID
+    [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1],         # EXIT
+    [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1],         # ENTRANCE
+    [450,       125,          5,        150,        120,      -1,     -1,     -1,     -1],         # NONE
+    [450,        50,         15,         50,        225,      -1,     -1,     -1,     -1]          # O_WALL
     ]
 
 ############ VALUE PRESETS END ############
@@ -61,34 +61,72 @@ def init_grid(xlen, ylen):      #create 2d array which holds map tiles
     return maptiles
 
 
-def rand_select(matrix, adj_ID):        #select a tile type, given a tile next to it and a probability matrix
-    randnum = r.randint(0,1000) / 1000
-    selected = False
-    selected_ID = 0
-    i = -1
-    sum = 0 
-    while selected == False and i+1 < len(TILE_ID):
-        i += 1
-        sum += matrix[adj_ID][i]
-        if randnum < sum:
-            selected = True
-            selected_ID = i
+def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a tile next to it and a probability matrix
+  sum_weights = [0] * len(TILE_ID)
+  null_id = [0] * len(TILE_ID)
+  total_weight = 0
+  selected = False
+  run_sum = 0
+  z = -1
+  selected_ID = 0
+
+  new_x = x + 1
+  new_y = y
+  for i in range(len(TILE_ID)):
+    if weight_matrix[grid[new_y][new_x]][i] != -1:
+	    sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
+    else:
+	    null_id[i] = 1
+
+  new_x = x - 1
+  new_y = y
+  for i in range(len(TILE_ID)):
+    if weight_matrix[grid[new_y][new_x]][i] != -1:
+        sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
+    else:
+        null_id[i] = 1
     
-    return selected_ID
-     
+  new_x = x 
+  new_y = y + 1
+  for i in range(len(TILE_ID)):
+    if weight_matrix[grid[new_y][new_x]][i] != -1:
+	    sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
+    else:
+	    null_id[i] = 1
+
+  new_x = x
+  new_y = y - 1
+  for i in range(len(TILE_ID)):
+    if weight_matrix[grid[new_y][new_x]][i] != -1:
+        sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
+    else:
+	    null_id[i] = 1
+
+  for i in range(len(sum_weights)):
+    total_weight += sum_weights[i]
+    
+  randnum = r.randint(0, total_weight)
+  while selected == False and z+1 < len(TILE_ID):
+    z += 1
+    run_sum += sum_weights[z]
+    if randnum <= run_sum and null_id[z] != 1:
+        selected = True
+        selected_ID = z
+      
+  return selected_ID
+
 def populate_grid(grid, x, y, ID):      #populate given grid
     if (x < SIZE_X and y < SIZE_Y and x >= 0 and y >= 0):
        if grid[y][x] == TILE_ID["NONE"]:  # mostly generates horizontally, not a huge fan
         # generate tile
-           newID = rand_select(prob_matrix, ID)
+           newID = rand_select(weight_matrix, x, y, grid)
            grid[y][x] = newID
            grid = populate_grid(grid,x+1, y, newID)
            grid = populate_grid(grid,x, y+1, newID)
-           grid = populate_grid(grid,x-1, y, newID)
-           grid = populate_grid(grid,x, y-1, newID)
+
 
     return grid
-
+"""
 def unblock_map(grid):      # ensures exits and entrances are not directly blocked by non-floor tiles
     for x in range(SIZE_X):
         if grid[0][x] == TILE_ID["EXIT"]:
@@ -97,14 +135,14 @@ def unblock_map(grid):      # ensures exits and entrances are not directly block
             grid[SIZE_Y-2][x] = TILE_ID["FLOOR"]
     
     return grid
-    
+"""  
 def create_maplist():       # creates the list of maps which will be used for the game
     num_maps = r.randint(3, 5)
     maplist = [None] * num_maps
     print("Generating %s maps...\n" % num_maps)
     for i in range(num_maps):
-        maptiles = init_grid(SIZE_X, SIZE_Y)        # to be rewritten, mostly output test            
-        maplist[i] = unblock_map(populate_grid(maptiles, 1, 1, TILE_ID["EXIT"]))   # populates from exit
+        maptiles = init_grid(SIZE_X, SIZE_Y)                    
+        maplist[i] = populate_grid(maptiles, 1, 1, TILE_ID["EXIT"])     # populates from exit
         
     return maplist, num_maps
 
@@ -114,7 +152,7 @@ def main():
     global maptiles
     global SIZE_X
     global SIZE_Y
-    global prob_matrix
+    global weight_matrix
 
     maplist, num_maps = create_maplist()
     for i in range(num_maps):
@@ -123,5 +161,4 @@ def main():
         print()
 
 main()
-
 
