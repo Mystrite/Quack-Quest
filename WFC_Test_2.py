@@ -62,15 +62,15 @@ def init_grid(xlen, ylen):      #create 2d array which holds map tiles
 
 
 def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a tile next to it and a probability matrix
-  sum_weights = [0] * len(TILE_ID)
-  null_id = [0] * len(TILE_ID)
-  total_weight = 0
-  selected = False
-  run_sum = 0
+  sum_weights = [0] * len(TILE_ID)      # sum of weightings for each tile type
+  null_id = [0] * len(TILE_ID)      # flags which tiles types are explicitly disallowed
+  total_weight = 0      # the sum of all items in sum_weights (total weighting for that tile)
+  selected = False      
+  run_sum = 0       # running total of each weighting
   z = -1
-  selected_ID = 0
+  selected_ID = 0       # ID that the tile will collapse into
 
-  new_x = x + 1
+  new_x = x + 1     # sums weights from id of tile 
   new_y = y
   for i in range(len(TILE_ID)):
     if weight_matrix[grid[new_y][new_x]][i] != -1:
@@ -115,14 +115,14 @@ def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a til
       
   return selected_ID
 
-def populate_grid(grid, x, y, ID):      #populate given grid
+def populate_grid(grid, x, y):      #populate given grid
     if (x < SIZE_X and y < SIZE_Y and x >= 0 and y >= 0):
        if grid[y][x] == TILE_ID["NONE"]:  # mostly generates horizontally, not a huge fan
         # generate tile
            newID = rand_select(weight_matrix, x, y, grid)
            grid[y][x] = newID
-           grid = populate_grid(grid,x+1, y, newID)
-           grid = populate_grid(grid,x, y+1, newID)
+           grid = populate_grid(grid,x+1, y)     # this ONLY works when generating from 1,1 (it does work though!)
+           grid = populate_grid(grid,x, y+1)
 
 
     return grid
@@ -142,7 +142,7 @@ def create_maplist():       # creates the list of maps which will be used for th
     print("Generating %s maps...\n" % num_maps)
     for i in range(num_maps):
         maptiles = init_grid(SIZE_X, SIZE_Y)                    
-        maplist[i] = populate_grid(maptiles, 1, 1, TILE_ID["EXIT"])     # populates from exit
+        maplist[i] = populate_grid(maptiles, 1, 1)      # populates from 1,1
         
     return maplist, num_maps
 
