@@ -11,7 +11,7 @@ ISSUES:
 
 -for textures:
 	- preset void could literally just be black, i think that would be pretty cool.
-
+	- use piskel for animations probably, best to make an /assets dir.
 IDEAS:
 	- boon/bane system
 	- get to choose from selection every chamber, boons are buffs, banes are debuffs (but give extra points)
