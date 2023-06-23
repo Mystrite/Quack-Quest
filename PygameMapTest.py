@@ -1,8 +1,14 @@
 import pygame
+import WFC_Test_2 as wfc
 
+TILE_ID = wfc.TILE_ID
+print(TILE_ID)
+GRIDS_LIST = wfc.generate()
 SWIDTH = 1440
 SHEIGHT = 720
 SCREEN = (SWIDTH, SHEIGHT)
+SMAP = (SWIDTH, SHEIGHT*0.8) 
+STILES = ()
 
 x = 50
 y = 50
@@ -12,11 +18,16 @@ run = True
 
 pygame.init()
 
+ICONS = {
+    "aaa" : 0
+    }
+
 win = pygame.display.set_mode(SCREEN)
 player_icon = pygame.image.load('./A-Level-NEA-new/assets/PLAYER_placeholder.png')
 player_icon = pygame.transform.scale(player_icon, (64 , 64))
 bg = pygame.image.load('./A-Level-NEA-new/assets/BACKGROUND_placeholder.png')
 pygame.display.set_caption("very cool epic game for cool people")
+
 
 clock = pygame.time.Clock()
 

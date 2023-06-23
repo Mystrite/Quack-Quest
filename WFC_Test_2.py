@@ -148,7 +148,7 @@ def create_maplist():       # creates the list of maps which will be used for th
 
 ############ MAP GEN FUNCS END ############
 
-def main():
+def generate():
     global maptiles
     global SIZE_X
     global SIZE_Y
@@ -159,6 +159,8 @@ def main():
         print("MAP %s:\n" % (i+1))
         outgrid(maplist[i], SIZE_X, SIZE_Y)
         print()
+    return maplist
 
-main()
+if __name__ == "__main__":
+    maplist = generate()
 

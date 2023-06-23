@@ -3,8 +3,9 @@ TO DO:
 	-Add tile types (DONE? - might be more to add)
 	-Need to do recursive generation now. (WORKS??) --- change weighting method to consider all adjacent tiles, PROB_MATRIX needs to be rewritten.
 	-implement some idea of preset rooms?	[might just not]
--2d array that handles entities [probably a bad idea]
 -time to start on pygame I think, will sort out player movement first so i understand how it works.
+-switch tile dict to array of tile objects: the object should have an image, ID
+
 
 ISSUES:
 	- converts O_WALL into floor tile, directly below exit ?? looks like issue with manual assign - was issue with recursion ---- should be fixed now
