@@ -8,7 +8,22 @@ SWIDTH = 1440
 SHEIGHT = 720
 SCREEN = (SWIDTH, SHEIGHT)
 SMAP = (SWIDTH, SHEIGHT*0.8) 
-STILES = ()
+STILES = (SWIDTH//wfc.SIZE_X, SHEIGHT//wfc.SIZE_Y)
+
+def load_images(): # will return arrays, initialise all the classes? maybe? 
+    return
+
+
+class tile:
+    def __init__(self, x, y, ID):
+        self.x = x
+        self.y = y
+        self.ID = ID
+        self.size = STILES
+        self.impassable = False
+        self.damages = False
+        self.heals = False
+        self.image = pygame.image.load('PLACEHOLDER_%s_tile.png' % ID)  # MUST CHANGE, VERY INEFFICIENT
 
 x = 50
 y = 50
@@ -18,8 +33,8 @@ run = True
 
 pygame.init()
 
-ICONS = {
-    "aaa" : 0
+ICONS = {   # i dont know what this was for
+    "" : 0
     }
 
 win = pygame.display.set_mode(SCREEN)
@@ -57,7 +72,6 @@ while run:
     elif keys[pygame.K_DOWN]:
         y += vel
 
-    win.fill((255, 255, 255))
     redraw()
 
 
