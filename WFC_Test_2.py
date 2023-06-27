@@ -14,7 +14,7 @@ TILE_ID = {
     "O_WALL": 8
 }
 
-SIZE_X = 25
+SIZE_X = 30
 SIZE_Y = 16
 weight_matrix = [
    # FLOOR      LAVA        HOLY        ROCK        VOID      EXIT    ENTER   NONE    O_WALL        MATRIX OF TILE WEIGHTINGS, -1 = CANNOT GENERATE

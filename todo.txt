@@ -5,6 +5,7 @@ TO DO:
 -switch tile dict to array of tile objects: the object should have an image, ID
 -need to preload all the images, could be done in a function i guess?
 	-important: next thing to do is make sure all the tiles display correctly :D
+		-read in the current map, then iterate over the tiles?
 
 ISSUES:
 	- converts O_WALL into floor tile, directly below exit ?? looks like issue with manual assign - was issue with recursion ---- should be fixed now
