@@ -1,6 +1,7 @@
 TO DO:
 -rewrite WFC code using probability matrix and recursion. [DONE??]
 	-implement some idea of preset rooms?	[might just not]
+	-entropy idea
 -time to start on pygame I think, will sort out player movement first so i understand how it works.
 -switch tile dict to array of tile objects: the object should have an image, ID
 -need to preload all the images, could be done in a function i guess?
