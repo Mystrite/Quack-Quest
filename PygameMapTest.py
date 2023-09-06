@@ -47,7 +47,6 @@ def draw_map(maplist, mapnum):
         for x in range(wfc.SIZE_X):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
-                print(map[y][x].size)
 
 conv_tiles_to_classes(GRIDS_LIST)
 x = 50
@@ -58,13 +57,13 @@ run = True
 
 pygame.init()
 
-ICONS = {   # i dont know what this was for
-    "" : 0
-    }
-
 win = pygame.display.set_mode(SCREEN)
-player_icon = pygame.image.load('./A-Level-NEA-new/assets/PLAYER_placeholder.png')
-player_icon = pygame.transform.scale(player_icon, (64 , 64))
+
+player_up = pygame.image.load('./A-Level-NEA-new/assets/Duck_UP.png')
+player_down = pygame.image.load('./A-Level-NEA-new/assets/Duck_DOWN.png')
+player_left = pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png')
+player_right = pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
+player_icon = player_up
 bg = pygame.image.load('./A-Level-NEA-new/assets/BACKGROUND_placeholder.png')
 pygame.display.set_caption("very cool epic game for cool people")
 
@@ -79,7 +78,7 @@ def redraw():
     pygame.display.update()
 
 while run:
-    clock.tick(30)
+    clock.tick(45)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -88,16 +87,19 @@ while run:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         x -= vel
+        player_icon = player_left
 
     elif keys[pygame.K_RIGHT]:
         x += vel
+        player_icon = player_right
 
     elif keys[pygame.K_UP]:
         y -= vel
+        player_icon = player_up
 
     elif keys[pygame.K_DOWN]:
         y += vel
-
+        player_icon = player_down
     redraw()
 
 
