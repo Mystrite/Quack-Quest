@@ -15,17 +15,17 @@ TILE_ID = {
 }
 
 SIZE_X = 30
-SIZE_Y = 16
+SIZE_Y = 15
 weight_matrix = [
    # FLOOR      LAVA        HOLY        ROCK        VOID      EXIT    ENTER   NONE    O_WALL        MATRIX OF TILE WEIGHTINGS, -1 = CANNOT GENERATE
-    [500,       100,          0,        100,        100,      -1,     -1,     -1,     -1],         # FLOOR
-    [0,         350,         -1,        150,        150,      -1,     -1,     -1,     -1],         # LAVA
-    [100,        -1,        125,        175,        100,      -1,     -1,     -1,     -1],         # HOLY
-    [180,       200,         25,        250,         50,      -1,     -1,     -1,     -1],         # ROCK
+    [500,        35,          0,        100,         75,      -1,     -1,     -1,     -1],         # FLOOR              HORIZONTAL = ORIGINAL TILE
+    [0,         350,         -1,         25,         25,      -1,     -1,     -1,     -1],         # LAVA
+    [100,        -1,        125,        250,        100,      -1,     -1,     -1,     -1],         # HOLY
+    [180,       150,         25,        250,         50,      -1,     -1,     -1,     -1],         # ROCK
     [350,        50,         25,         25,        300,      -1,     -1,     -1,     -1],         # VOID
     [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1],         # EXIT
     [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1],         # ENTRANCE
-    [450,       125,          5,        150,        120,      -1,     -1,     -1,     -1],         # NONE
+    [450,        65,          1,         60,         50,      -1,     -1,     -1,     -1],         # NONE
     [450,        50,         15,         50,        225,      -1,     -1,     -1,     -1]          # O_WALL
     ]
 
@@ -60,6 +60,32 @@ def init_grid(xlen, ylen):      #create 2d array which holds map tiles
 
     return maptiles
 
+
+def entropy(grid):
+    least_entropic_x = 0
+    least_entropic_y = 0
+    max_entropy = 5
+    for x in range(SIZE_X):
+        for y in range(SIZE_Y):
+            entropy = 4
+            if grid[y][x] == TILE_ID["NONE"]:
+                if grid[y+1][x] != TILE_ID["NONE"]:
+                    entropy -= 1
+                if grid[y-1][x] != TILE_ID["NONE"]:
+                    entropy -= 1
+                if grid[y][x+1] != TILE_ID["NONE"]:
+                    entropy -= 1
+                if grid[y][x-1] != TILE_ID["NONE"]:
+                    entropy -= 1
+                if entropy < max_entropy:
+                    max_entropy = entropy
+                    least_entropic_x = x
+                    least_entropic_y = y
+
+    if max_entropy == 5:
+        return -1, -1
+    else:
+        return least_entropic_x, least_entropic_y
 
 def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a tile next to it and a probability matrix
   sum_weights = [0] * len(TILE_ID)      # sum of weightings for each tile type
@@ -115,15 +141,13 @@ def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a til
       
   return selected_ID
 
-def populate_grid(grid, x, y):      #populate given grid
-    if (x < SIZE_X and y < SIZE_Y and x >= 0 and y >= 0):
-       if grid[y][x] == TILE_ID["NONE"]:  # mostly generates horizontally, not a huge fan
-        # generate tile
-           newID = rand_select(weight_matrix, x, y, grid)
-           grid[y][x] = newID
-           grid = populate_grid(grid,x+1, y)     # this ONLY works when generating from 1,1 (it does work though!)
-           grid = populate_grid(grid,x, y+1)
-
+def populate_grid(grid):      #populate given grid
+    x, y = entropy(grid)
+    while x != -1:
+        newID = rand_select(weight_matrix, x, y, grid)
+        grid[y][x] = newID
+        x, y = entropy(grid)
+        
 
     return grid
 """
@@ -142,8 +166,8 @@ def create_maplist():       # creates the list of maps which will be used for th
     print("Generating %s maps...\n" % num_maps)
     for i in range(num_maps):
         maptiles = init_grid(SIZE_X, SIZE_Y)                    
-        maplist[i] = populate_grid(maptiles, 1, 1)      # populates from 1,1
-        
+        maplist[i] = populate_grid(maptiles)     # populates from 1,1
+
     return maplist, num_maps
 
 ############ MAP GEN FUNCS END ############
