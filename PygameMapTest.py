@@ -32,6 +32,25 @@ class entity:   # keep an eye on, inheritance may not be suitable here.
         self.vel = 0
         self.health = 0
 
+class player:
+    def __init__(self):
+        self.x = 50
+        self.y = 50
+        self.vel = 5
+        self.direction = "UP"
+        self.icons = {
+            "UP" : pygame.image.load('./A-Level-NEA-new/assets/Duck_UP.png'),
+            "DOWN" : pygame.image.load('./A-Level-NEA-new/assets/Duck_DOWN.png'),
+            "LEFT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png'),
+            "RIGHT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
+        }
+
+
+    def draw(self,win):
+        
+        win.blit(self.icons[self.direction], (self.x,self.y))
+        
+
 def conv_tiles_to_classes(maplist):
     start_y = SHEIGHT*0.2
     offsetx = SWIDTH//wfc.SIZE_X
@@ -49,9 +68,7 @@ def draw_map(maplist, mapnum):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
 
 conv_tiles_to_classes(GRIDS_LIST)
-x = 50
-y = 50
-vel = 5
+
 
 run = True
 
@@ -64,7 +81,6 @@ player_down = pygame.image.load('./A-Level-NEA-new/assets/Duck_DOWN.png')
 player_left = pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png')
 player_right = pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
 player_icon = player_up
-bg = pygame.image.load('./A-Level-NEA-new/assets/BACKGROUND_placeholder.png')
 pygame.display.set_caption("very cool epic game for cool people")
 
 
@@ -72,10 +88,11 @@ clock = pygame.time.Clock()
 
 
 def redraw():
-    win.blit(bg, (0,0))
     draw_map(GRIDS_LIST, 1)
-    win.blit(player_icon, (x,y))
+    duck.draw(win)
     pygame.display.update()
+
+duck = player()
 
 while run:
     clock.tick(45)
@@ -86,19 +103,21 @@ while run:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        x -= vel
+        duck.x -= duck.vel
+        duck.direction = "LEFT"
         player_icon = player_left
-
     elif keys[pygame.K_RIGHT]:
-        x += vel
+        duck.x += duck.vel
+        duck.direction = "RIGHT"
         player_icon = player_right
-
     elif keys[pygame.K_UP]:
-        y -= vel
+        duck.y -= duck.vel
+        duck.direction = "UP"
         player_icon = player_up
 
     elif keys[pygame.K_DOWN]:
-        y += vel
+        duck.y += duck.vel
+        duck.direction = "DOWN"
         player_icon = player_down
     redraw()
 
