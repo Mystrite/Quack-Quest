@@ -29,13 +29,16 @@ pygame.display.set_caption("very cool epic game for cool people")
 
 clock = pygame.time.Clock()
 
-class  textbutton:
-    def __init__(self, x, y):
-        self.x = x
+class  centrebutton:
+    def __init__(self, width, height, y):
+        self.width = width
+        self.height = height
+        self.x = (SWIDTH-self.width//2) 
         self.y = y
 
-
+    def filltext():
         return
+    
     
 class tile:
     def __init__(self, x, y, ID):
@@ -109,16 +112,27 @@ def main_menu():
     
     
     while True:
+        mx, my = pygame.mouse.get_pos()
         win.fill((0,190,255))
-        drawtext("weezer", font, (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
+        drawtext("main menu", font, (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
+        start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
+        start_button = pygame.Rect()        # switch around to make it work with button classes
+        if start_button.collidepoint((mx, my)):
+            if click:
+                game()
+
+        pygame.draw.rect(win, (255,0,0), start_button)
+        drawtext("START", font,(255,255,255),win, 500,500)
         pygame.display.update()
+
+def game():
+    print("starting!")
 
 duck = player()
 
 def dungeon():
     clock.tick(30)
     while run:
-        mx, my = pygame.mouse.get_pos()
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
