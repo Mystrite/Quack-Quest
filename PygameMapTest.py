@@ -10,7 +10,9 @@ SCREEN = (SWIDTH, SHEIGHT)
 SMAP = (SWIDTH, SHEIGHT*0.8) 
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
 
-font = pygame.font.SysFont("comicsansms", 90)
+fonts = {
+    "comicsans_small" : pygame.font.SysFont("comicsansms", 45)
+}
 
 tile_icons = [None] * len(wfc.TILE_ID)
 for id in range(len(wfc.TILE_ID)):
@@ -29,6 +31,12 @@ pygame.display.set_caption("very cool epic game for cool people")
 
 clock = pygame.time.Clock()
 
+def drawtext(text, font, colour, screen, x, y):
+    object = font.render(text, 1, colour)
+    textrect = object.get_rect()
+    textrect.topleft = (x, y)
+    screen.blit(object, textrect)
+
 class  centrebutton:
     def __init__(self, width, height, y):
         self.width = width
@@ -37,8 +45,10 @@ class  centrebutton:
         self.y = y
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-    def filltext():
-        return
+    def filltext(self, text, font, colour, win):
+        pygame.draw.rect(win, (255,0,0), self.rect)
+        drawtext(text, font, colour, win, self.x+self.width*0.25, self.y)
+        print(self.x, self.y)
     
     
 class tile:
@@ -77,12 +87,6 @@ class player:
         
         win.blit(self.icons[self.direction], (self.x,self.y))
         
-
-def drawtext(text, font, colour, screen, x, y):
-    object = font.render(text, 1, colour)
-    textrect = object.get_rect()
-    textrect.topleft = (x, y)
-    screen.blit(object, textrect)
 
 def conv_tiles_to_classes(maplist):
     start_y = SHEIGHT*0.2
@@ -129,14 +133,15 @@ def main_menu():
                     click = True
                     
         win.fill((0,190,255))
-        drawtext("main menu", font, (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
+        drawtext("main menu", fonts["comicsans_small"], (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
+        
         if start_button.rect.collidepoint((mx, my)):
             if click:
                 game()
 
-        pygame.draw.rect(win, (255,0,0), start_button.rect)
-        drawtext("START", font,(255,255,255),win, 500,500)
+        start_button.filltext("oo aaa test", fonts["comicsans_small"], (255,255,255), win)
+        drawtext("START", fonts["comicsans_small"],(255,255,255),win, 500,500)
 
         pygame.display.update()
 
@@ -172,7 +177,6 @@ def dungeon():
             duck.direction = "DOWN"
             player_icon = player_down
         redraw()
-
 
 if __name__ == "__main__":
     main_menu()
