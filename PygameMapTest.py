@@ -33,8 +33,9 @@ class  centrebutton:
     def __init__(self, width, height, y):
         self.width = width
         self.height = height
-        self.x = (SWIDTH-self.width//2) 
+        self.x = (SWIDTH-self.width)//2
         self.y = y
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def filltext():
         return
@@ -113,16 +114,30 @@ def main_menu():
     
     while True:
         mx, my = pygame.mouse.get_pos()
+
+        click = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+                    
         win.fill((0,190,255))
         drawtext("main menu", font, (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
-        start_button = pygame.Rect()        # switch around to make it work with button classes
-        if start_button.collidepoint((mx, my)):
+        if start_button.rect.collidepoint((mx, my)):
             if click:
                 game()
 
-        pygame.draw.rect(win, (255,0,0), start_button)
+        pygame.draw.rect(win, (255,0,0), start_button.rect)
         drawtext("START", font,(255,255,255),win, 500,500)
+
         pygame.display.update()
 
 def game():
