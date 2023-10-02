@@ -11,7 +11,8 @@ SMAP = (SWIDTH, SHEIGHT*0.8)
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
 
 fonts = {
-    "comicsans_small" : pygame.font.SysFont("comicsansms", 45)
+    "comicsans_small" : pygame.font.SysFont("comicsansms", 45),
+    "menubutton" : pygame.font.SysFont("aaa", 3)
 }
 
 tile_icons = [None] * len(wfc.TILE_ID)
@@ -47,8 +48,7 @@ class  centrebutton:
 
     def filltext(self, text, font, colour, win):
         pygame.draw.rect(win, (255,0,0), self.rect)
-        drawtext(text, font, colour, win, self.x+self.width*0.25, self.y)
-        print(self.x, self.y)
+        drawtext(text, font, colour, win, self.x+self.width*0.5-(len(text)*12), (self.y)+self.height//5)
     
     
 class tile:
@@ -97,7 +97,6 @@ def conv_tiles_to_classes(maplist):
             for x in range(wfc.SIZE_X): 
                 maplist[i][y][x] = tile(x*offsetx,start_y+(y*offsety),maplist[i][y][x])
  
-
 def draw_map(maplist, mapnum):
         map = maplist[mapnum]
         for x in range(wfc.SIZE_X):
@@ -105,7 +104,6 @@ def draw_map(maplist, mapnum):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
 
 conv_tiles_to_classes(GRIDS_LIST)
-
 
 def redraw():
     draw_map(GRIDS_LIST, 1)
@@ -135,18 +133,24 @@ def main_menu():
         win.fill((0,190,255))
         drawtext("main menu", fonts["comicsans_small"], (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
+        leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
         
         if start_button.rect.collidepoint((mx, my)):
             if click:
                 game()
+        if leader_button.rect.collidepoint((mx, my)):
+            if click:
+                leaderboard()
 
-        start_button.filltext("oo aaa test", fonts["comicsans_small"], (255,255,255), win)
-        drawtext("START", fonts["comicsans_small"],(255,255,255),win, 500,500)
-
+        start_button.filltext("Start Game", fonts["comicsans_small"], (255,255,255), win)
+        leader_button.filltext("Leaderboard", fonts["comicsans_small"], (255,255,255), win)
         pygame.display.update()
 
 def game():
-    print("starting!")
+    print("gaming!")
+
+def leaderboard():
+    print("leaderboarding!")
 
 duck = player()
 
