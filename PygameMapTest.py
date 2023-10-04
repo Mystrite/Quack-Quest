@@ -57,7 +57,14 @@ class inputbox(centrebutton):
         drawtext(text, font, colour, win, self.x+30, (self.y)+self.height//5)
 
 class returnbutton:
-    def __init__(self, x, y): # unfinished!!
+    def __init__(self, x, y, size, icon): # unfinished!!
+        self.x = x
+        self.y = y
+        self.size = size
+        self.icon = pygame.transform.scale(icon, self.size) 
+        self.rect = pygame.Rect(self.x, self.y, self.size[0], self.size[1])
+
+    def draw(self):
         return
     
 class tile:
@@ -70,13 +77,6 @@ class tile:
         self.damages = False
         self.heals = False
         self.image = pygame.transform.scale(tile_icons[self.ID], self.size) 
-
-class entity:   # keep an eye on, inheritance may not be suitable here.
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.vel = 0
-        self.health = 0
 
 class player:
     def __init__(self):
