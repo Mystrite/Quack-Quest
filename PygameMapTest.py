@@ -51,6 +51,15 @@ class  centrebutton:
         drawtext(text, font, colour, win, self.x+self.width*0.5-(len(text)*12), (self.y)+self.height//5)
     
     
+class inputbox(centrebutton):
+    def filltext(self, text, font, colour, win):
+        pygame.draw.rect(win, (255,0,0), self.rect)
+        drawtext(text, font, colour, win, self.x+30, (self.y)+self.height//5)
+
+class returnbutton:
+    def __init__(self, x, y): # unfinished!!
+        return
+    
 class tile:
     def __init__(self, x, y, ID):
         self.ID = ID
@@ -82,9 +91,7 @@ class player:
             "RIGHT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
         }
 
-
     def draw(self,win):
-        
         win.blit(self.icons[self.direction], (self.x,self.y))
         
 
@@ -112,9 +119,9 @@ def redraw():
 
 def main_menu():
     clock.tick(15)
+    running = True
     
-    
-    while True:
+    while running:
         mx, my = pygame.mouse.get_pos()
 
         click = False
@@ -124,6 +131,7 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    running = False
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -131,13 +139,13 @@ def main_menu():
                     click = True
                     
         win.fill((0,190,255))
-        drawtext("main menu", fonts["comicsans_small"], (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
+        drawtext("Quack Quest", fonts["comicsans_small"], (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
         leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
         
         if start_button.rect.collidepoint((mx, my)):
             if click:
-                game()
+                name_select()
         if leader_button.rect.collidepoint((mx, my)):
             if click:
                 leaderboard()
@@ -146,8 +154,29 @@ def main_menu():
         leader_button.filltext("Leaderboard", fonts["comicsans_small"], (255,255,255), win)
         pygame.display.update()
 
-def game():
-    print("gaming!")
+def name_select():
+    running = True
+    clock.tick(60)
+    name = ""
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()  
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+                elif event.key == pygame.K_BACKSPACE:
+                    name = name[:-1]
+                elif len(name) <= 15:
+                    name += event.unicode
+
+        box = inputbox(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
+        box.filltext(name, fonts["comicsans_small"], (255,255,255), win)
+        pygame.display.flip()
 
 def leaderboard():
     print("leaderboarding!")
