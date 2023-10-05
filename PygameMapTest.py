@@ -4,8 +4,9 @@ import WFC_Test_2 as wfc
 
 pygame.init()
 GRIDS_LIST = wfc.generate()
-SWIDTH = 1920
-SHEIGHT = 1080
+dispInfObj = pygame.display.Info()
+SWIDTH = dispInfObj.current_w
+SHEIGHT = dispInfObj.current_h
 SCREEN = (SWIDTH, SHEIGHT)
 SMAP = (SWIDTH, SHEIGHT*0.8) 
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
@@ -13,6 +14,10 @@ STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
 fonts = {
     "comicsans_small" : pygame.font.SysFont("comicsansms", 45),
     "menubutton" : pygame.font.SysFont("aaa", 3)
+}
+
+button_icons = {
+    "green_forward" : pygame.image.load('./A-Level-NEA-new/assets/GreenArrow.png')
 }
 
 tile_icons = [None] * len(wfc.TILE_ID)
@@ -49,7 +54,7 @@ class inputbox(centrebutton):
         pygame.draw.rect(win, (255,0,0), self.rect)
         drawtext(text, font, colour, win, self.x+30, (self.y)+self.height//5)
 
-class returnbutton:
+class clickablebutton:
     def __init__(self, x, y, size, icon): # unfinished!!
         self.x = x
         self.y = y
@@ -58,7 +63,7 @@ class returnbutton:
         self.rect = pygame.Rect(self.x, self.y, self.size[0], self.size[1])
 
     def draw(self):
-        return
+        win.blit(self.icon, (self.x, self.y))
     
 class tile:
     def __init__(self, x, y, ID):
@@ -85,13 +90,13 @@ class player:
         }
 
     def draw(self,win):
-        win.blit(self.icons[self.direction], (self.x,self.y))
+        win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
         
 
 def conv_tiles_to_classes(maplist):
     start_y = SHEIGHT*0.2
-    offsetx = SWIDTH//wfc.SIZE_X
-    offsety = (SHEIGHT-start_y)//wfc.SIZE_Y
+    offsetx = SWIDTH/wfc.SIZE_X
+    offsety = offsetx
     for i in range(len(maplist)):
         for y in range(wfc.SIZE_Y):
             for x in range(wfc.SIZE_X): 
@@ -169,6 +174,8 @@ def name_select():
 
         box = inputbox(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
         box.filltext(name, fonts["comicsans_small"], (255,255,255), win)
+        progress_button = clickablebutton((box.x + box.width + 25), box.y , (box.height, box.height), button_icons["green_forward"])
+        progress_button.draw()
         pygame.display.flip()
 
 def leaderboard():
@@ -178,6 +185,7 @@ duck = player()
 
 def dungeon():
     clock.tick(30)
+    run = True
     while run:
         
         for event in pygame.event.get():
@@ -188,20 +196,16 @@ def dungeon():
         if keys[pygame.K_LEFT]:
             duck.x -= duck.vel
             duck.direction = "LEFT"
-            player_icon = player_left
         elif keys[pygame.K_RIGHT]:
             duck.x += duck.vel
             duck.direction = "RIGHT"
-            player_icon = player_right
         elif keys[pygame.K_UP]:
             duck.y -= duck.vel
             duck.direction = "UP"
-            player_icon = player_up
 
         elif keys[pygame.K_DOWN]:
             duck.y += duck.vel
             duck.direction = "DOWN"
-            player_icon = player_down
         redraw()
 
 if __name__ == "__main__":
