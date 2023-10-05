@@ -1,19 +1,12 @@
 TO DO:
--rewrite WFC code using probability matrix and recursion. [DONE??]
 	-implement some idea of preset rooms?	[might just not]
-	-entropy idea
--time to start on pygame I think, will sort out player movement first so i understand how it works.
--switch tile dict to array of tile objects: the object should have an image, ID
--need to preload all the images, could be done in a function i guess?
-	-important: next thing to do is make sure all the tiles display correctly :D
-		-read in the current map, then iterate over the tiles?
+	-clickable button class
+		-different kinds can inherit as fit
+	-leaderboard system
+	-the game.
 
 ISSUES:
-	- converts O_WALL into floor tile, directly below exit ?? looks like issue with manual assign - was issue with recursion ---- should be fixed now
 
--for textures:
-	- preset void could literally just be black, i think that would be pretty cool.
-	- use piskel for animations probably, best to make an /assets dir.
 IDEAS:
 	- boon/bane system
 	- get to choose from selection every chamber, boons are buffs, banes are debuffs (but give extra points)
