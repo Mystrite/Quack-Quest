@@ -19,15 +19,8 @@ tile_icons = [None] * len(wfc.TILE_ID)
 for id in range(len(wfc.TILE_ID)):
     tile_icons[id] =  pygame.image.load('./A-Level-NEA-new/assets/TILE_%s_placeholder.png' % id)
 
-run = True
-
 win = pygame.display.set_mode(SCREEN)
 
-player_up = pygame.image.load('./A-Level-NEA-new/assets/Duck_UP.png')
-player_down = pygame.image.load('./A-Level-NEA-new/assets/Duck_DOWN.png')
-player_left = pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png')
-player_right = pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
-player_icon = player_up
 pygame.display.set_caption("very cool epic game for cool people")
 
 clock = pygame.time.Clock()
