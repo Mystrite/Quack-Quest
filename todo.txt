@@ -4,7 +4,7 @@ TO DO:
 		-different kinds can inherit as fit
 	-leaderboard system
 	-the game.
-
+	^\w*$
 ISSUES:
 
 IDEAS:
