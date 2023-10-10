@@ -1,14 +1,15 @@
 import pygame, sys
+import random
 import WFC_Test_2 as wfc
+import re
 
 
 pygame.init()
-GRIDS_LIST = wfc.generate()
+GRIDS_LIST = wfc.generate(5)
 dispInfObj = pygame.display.Info()
 SWIDTH = dispInfObj.current_w
 SHEIGHT = dispInfObj.current_h
 SCREEN = (SWIDTH, SHEIGHT)
-SMAP = (SWIDTH, SHEIGHT*0.8) 
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
 
 fonts = {
@@ -17,7 +18,8 @@ fonts = {
 }
 
 button_icons = {
-    "green_forward" : pygame.image.load('./A-Level-NEA-new/assets/GreenArrow.png')
+    "green_forward" : pygame.image.load('./A-Level-NEA-new/assets/GreenArrow.png'),
+    "grey_forward"  : pygame.image.load('./A-Level-NEA-new/assets/GreyedGreenArrow.png')
 }
 
 tile_icons = [None] * len(wfc.TILE_ID)
@@ -63,6 +65,7 @@ class clickablebutton:
         self.rect = pygame.Rect(self.x, self.y, self.size[0], self.size[1])
 
     def draw(self):
+        self.icon = pygame.transform.scale(self.icon, self.size) 
         win.blit(self.icon, (self.x, self.y))
     
 class tile:
@@ -89,12 +92,13 @@ class player:
             "RIGHT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
         }
 
-    def draw(self,win):
+    def draw(self):
         win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
         
 
 def conv_tiles_to_classes(maplist):
-    start_y = SHEIGHT*0.2
+    start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
+    print(start_y)
     offsetx = SWIDTH/wfc.SIZE_X
     offsety = offsetx
     for i in range(len(maplist)):
@@ -112,7 +116,6 @@ conv_tiles_to_classes(GRIDS_LIST)
 
 def redraw():
     draw_map(GRIDS_LIST, 1)
-    duck.draw(win)
     pygame.display.update()
 
 def main_menu():
@@ -156,8 +159,14 @@ def name_select():
     running = True
     clock.tick(60)
     name = ""
-
+    validname = False
+    box = inputbox(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
+    progress_button = clickablebutton((box.x + box.width + 25), box.y , (box.height, box.height), button_icons["grey_forward"])
+    
     while running:
+        mx, my = pygame.mouse.get_pos()
+        click = False
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -172,9 +181,24 @@ def name_select():
                 elif len(name) <= 15:
                     name += event.unicode
 
-        box = inputbox(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
+                if re.search("^\w*$", name) and name != "":
+                    validname = True
+                    progress_button.icon = button_icons["green_forward"]
+                else:
+                    validname = False
+                    progress_button.icon = button_icons["grey_forward"]
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+            if progress_button.rect.collidepoint((mx, my)):
+                if click and validname:
+                    dungeon()
+                elif click:
+                    print("invalid")
+
         box.filltext(name, fonts["comicsans_small"], (255,255,255), win)
-        progress_button = clickablebutton((box.x + box.width + 25), box.y , (box.height, box.height), button_icons["green_forward"])
         progress_button.draw()
         pygame.display.flip()
 
