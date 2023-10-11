@@ -160,7 +160,7 @@ def unblock_map(grid):      # ensures exits and entrances are not directly block
     
     return grid
 """  
-def create_maplist(num_maps):       # creates the list of maps which will be used for the game
+def create_maplist():       # creates the list of maps which will be used for the game
     num_maps = r.randint(3, 5)
     maplist = [None] * num_maps
     print("Generating %s maps...\n" % num_maps)
