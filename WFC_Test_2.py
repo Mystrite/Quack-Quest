@@ -1,5 +1,5 @@
 import random as r
-
+import time
 ############ VALUE PRESETS BEGIN ############
 
 TILE_ID = {
@@ -183,9 +183,12 @@ def generate():
     return maplist, num_maps
 
 if __name__ == "__main__":
+    start = time.time()
     maplist, num_maps = generate()
     for i in range(num_maps):
         print("MAP %s:\n" % (i+1))
         outgrid(maplist[i], SIZE_X, SIZE_Y)
         print()
+    end = time.time()
+    print("%s seconds to generate %s maps" % (end-start, num_maps))
 
