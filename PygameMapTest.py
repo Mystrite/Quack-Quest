@@ -5,7 +5,7 @@ import re
 
 
 pygame.init()
-GRIDS_LIST = wfc.generate(5)
+GRIDS_LIST, NUM_MAPS = wfc.generate()
 dispInfObj = pygame.display.Info()
 SWIDTH = dispInfObj.current_w
 SHEIGHT = dispInfObj.current_h
@@ -116,6 +116,7 @@ conv_tiles_to_classes(GRIDS_LIST)
 
 def redraw():
     draw_map(GRIDS_LIST, 1)
+    duck.draw()
     pygame.display.update()
 
 def main_menu():
@@ -211,7 +212,7 @@ def dungeon():
     clock.tick(30)
     run = True
     while run:
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
