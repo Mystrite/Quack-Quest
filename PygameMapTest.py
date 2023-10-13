@@ -2,6 +2,7 @@ import pygame, sys
 import random
 import WFC_Test_2 as wfc
 import re
+import time
 
 
 pygame.init()
@@ -12,9 +13,11 @@ SHEIGHT = dispInfObj.current_h
 SCREEN = (SWIDTH, SHEIGHT)
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
 
+fontlist = pygame.font.get_fonts()
+print(fontlist)
 fonts = {
-    "comicsans_small" : pygame.font.SysFont("comicsansms", 45),
-    "menubutton" : pygame.font.SysFont("aaa", 3)
+    "menubutton" : pygame.font.SysFont("ebrima", 45),
+    "chambercard" : pygame.font.SysFont("algerian", 100)
 }
 
 button_icons = {
@@ -68,7 +71,7 @@ class clickablebutton:
         self.icon = pygame.transform.scale(self.icon, self.size) 
         win.blit(self.icon, (self.x, self.y))
     
-class tile:
+class tile:     # switch tile classes to inheritance??
     def __init__(self, x, y, ID):
         self.ID = ID
         self.x = x
@@ -78,12 +81,14 @@ class tile:
         self.damages = False
         self.heals = False
         self.image = pygame.transform.scale(tile_icons[self.ID], self.size) 
-
+        self.collbox = pygame.Rect(self.x, self.y, self.width, self.height) # could only create for specified types.
+        
 class player:
     def __init__(self):
         self.x = 50
         self.y = 50
-        self.vel = 5
+        self.vel = 1
+        self.health = 100
         self.direction = "UP"
         self.icons = {
             "UP" : pygame.image.load('./A-Level-NEA-new/assets/Duck_UP.png'),
@@ -98,7 +103,6 @@ class player:
 
 def conv_tiles_to_classes(maplist):
     start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
-    print(start_y)
     offsetx = SWIDTH/wfc.SIZE_X
     offsety = offsetx
     for i in range(len(maplist)):
@@ -112,10 +116,8 @@ def draw_map(maplist, mapnum):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
 
-conv_tiles_to_classes(GRIDS_LIST)
-
-def redraw():
-    draw_map(GRIDS_LIST, 1)
+def redraw(map_list, map_num, duck):
+    draw_map(map_list, map_num)
     duck.draw()
     pygame.display.update()
 
@@ -141,7 +143,7 @@ def main_menu():
                     click = True
                     
         win.fill((0,190,255))
-        drawtext("Quack Quest", fonts["comicsans_small"], (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
+        drawtext("Quack Quest", fonts["menubutton"], (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
         leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
         
@@ -152,8 +154,8 @@ def main_menu():
             if click:
                 leaderboard()
 
-        start_button.filltext("Start Game", fonts["comicsans_small"], (255,255,255), win)
-        leader_button.filltext("Leaderboard", fonts["comicsans_small"], (255,255,255), win)
+        start_button.filltext("Start Game", fonts["menubutton"], (255,255,255), win)
+        leader_button.filltext("Leaderboard", fonts["menubutton"], (255,255,255), win)
         pygame.display.update()
 
 def name_select():
@@ -195,24 +197,51 @@ def name_select():
 
             if progress_button.rect.collidepoint((mx, my)):
                 if click and validname:
-                    dungeon()
+                    game()
                 elif click:
                     print("invalid")
 
-        box.filltext(name, fonts["comicsans_small"], (255,255,255), win)
+        box.filltext(name, fonts["menubutton"], (255,255,255), win)
         progress_button.draw()
         pygame.display.flip()
 
 def leaderboard():
     print("leaderboarding!")
 
-duck = player()
 
-def dungeon():
+def game():
+    map_num = 0
+    alive = True
+    hasWon = False
+    progress = False
+    newduck = player()
+    GRIDS_LIST, NUM_MAPS = wfc.generate()
+    conv_tiles_to_classes(GRIDS_LIST)
+
+    while alive == True and hasWon == False:
+        win.fill((0,0,0))
+        drawtext("Chamber %s" % str(map_num+1), fonts["chambercard"], (255,255,255), win, SWIDTH//2-300,SHEIGHT//2-100)
+        pygame.display.update()
+
+        time.sleep(3)
+        progress = dungeon(GRIDS_LIST, map_num, newduck)
+
+        if progress == False:
+            alive = False
+        else:
+            map_num += 1
+
+        if map_num > NUM_MAPS:
+            hasWon = True
+
+
+def dungeon(maplist, map_num, duck):
     clock.tick(30)
     run = True
     while run:
-
+        if duck.health == 0:
+            return False
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -221,6 +250,7 @@ def dungeon():
         if keys[pygame.K_LEFT]:
             duck.x -= duck.vel
             duck.direction = "LEFT"
+            return True
         elif keys[pygame.K_RIGHT]:
             duck.x += duck.vel
             duck.direction = "RIGHT"
@@ -231,7 +261,7 @@ def dungeon():
         elif keys[pygame.K_DOWN]:
             duck.y += duck.vel
             duck.direction = "DOWN"
-        redraw()
+        redraw(maplist, map_num, duck)
 
 if __name__ == "__main__":
     main_menu()
