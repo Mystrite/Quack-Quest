@@ -100,9 +100,9 @@ def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a til
   new_y = y
   for i in range(len(TILE_ID)):
     if weight_matrix[grid[new_y][new_x]][i] != -1:
-	    sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
+        sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
     else:
-	    null_id[i] = 1
+        null_id[i] = 1
 
   new_x = x - 1
   new_y = y
@@ -116,9 +116,9 @@ def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a til
   new_y = y + 1
   for i in range(len(TILE_ID)):
     if weight_matrix[grid[new_y][new_x]][i] != -1:
-	    sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
+        sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
     else:
-	    null_id[i] = 1
+        null_id[i] = 1
 
   new_x = x
   new_y = y - 1
@@ -126,7 +126,7 @@ def rand_select(weight_matrix, x, y, grid):     #select a tile type, given a til
     if weight_matrix[grid[new_y][new_x]][i] != -1:
         sum_weights[i] += weight_matrix[grid[new_y][new_x]][i]
     else:
-	    null_id[i] = 1
+        null_id[i] = 1
 
   for i in range(len(sum_weights)):
     total_weight += sum_weights[i]
