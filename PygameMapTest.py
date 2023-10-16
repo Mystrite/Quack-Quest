@@ -81,8 +81,13 @@ class tile:     # switch tile classes to inheritance??
         self.damages = False
         self.heals = False
         self.image = pygame.transform.scale(tile_icons[self.ID], self.size) 
-        self.collbox = pygame.Rect(self.x, self.y, self.width, self.height) # could only create for specified types.
+        self.collbox = pygame.Rect(self.x, self.y, self.size[0], self.size[1]) # could only create for specified types.
         
+class impassablelist:
+    def __init__(self):
+        self.tile = None
+        self.next = None
+
 class player:
     def __init__(self):
         self.x = 50
@@ -96,19 +101,58 @@ class player:
             "LEFT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png'),
             "RIGHT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
         }
+        self.rect = pygame.Rect(self.x, self.y, 64, 64)
+
+    def move(self, newdir):
+        self.direction = newdir
+        if self.direction == "UP":
+            self.y -= self.vel
+            self.rect = pygame.Rect.move(self.rect, 0, -self.vel)
+
+        elif self.direction == "DOWN":
+            self.y += self.vel
+            self.rect = pygame.Rect.move(self.rect, 0, self.vel) 
+
+        elif self.direction == "LEFT":
+            self.x -= self.vel
+            self.rect = pygame.Rect.move(self.rect, -self.vel, 0)
+            
+        elif self.direction == "RIGHT":
+            self.x += self.vel
+            self.rect = pygame.Rect.move(self.rect, self.vel, 0)
+
 
     def draw(self):
         win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
         
+def addtolist(head, new):
+    if head == None:
+        return new
+    new.next = head
+    return new
+
+def outlist(head):
+    temp = head
+    while temp != None:
+        print(temp.tile.ID)
+        temp = temp.next
 
 def conv_tiles_to_classes(maplist):
     start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
     offsetx = SWIDTH/wfc.SIZE_X
     offsety = offsetx
+    impass_list = impassablelist()
     for i in range(len(maplist)):
         for y in range(wfc.SIZE_Y):
             for x in range(wfc.SIZE_X): 
                 maplist[i][y][x] = tile(x*offsetx,start_y+(y*offsety),maplist[i][y][x])
+                if maplist[i][y][x].ID == wfc.TILE_ID["O_WALL"]:
+                    maplist[i][y][x].impassable = True
+                    newitem = impassablelist()
+                    newitem.tile = maplist[i][y][x]
+                    
+                    addtolist(impass_list, newitem)
+                    outlist(impass_list)
  
 def draw_map(maplist, mapnum):
         map = maplist[mapnum]
@@ -247,20 +291,17 @@ def dungeon(maplist, map_num, duck):
                 run = False
 
         keys = pygame.key.get_pressed()
+
         if keys[pygame.K_LEFT]:
-            duck.x -= duck.vel
-            duck.direction = "LEFT"
+            duck.move("LEFT")
             return True
         elif keys[pygame.K_RIGHT]:
-            duck.x += duck.vel
-            duck.direction = "RIGHT"
+            duck.move("RIGHT")
         elif keys[pygame.K_UP]:
-            duck.y -= duck.vel
-            duck.direction = "UP"
-
+            duck.move("UP")
         elif keys[pygame.K_DOWN]:
-            duck.y += duck.vel
-            duck.direction = "DOWN"
+            duck.move("DOWN")
+
         redraw(maplist, map_num, duck)
 
 if __name__ == "__main__":
