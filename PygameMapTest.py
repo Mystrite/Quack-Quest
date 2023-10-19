@@ -151,7 +151,7 @@ class player:
 
     def draw(self):
         win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
-        #pygame.draw.rect(win, (255,0,0), self.rect)
+        # pygame.draw.rect(win, (255,0,0), self.rect) # DEBUG - DUCK HITBOX
 
 
 
@@ -176,9 +176,12 @@ def conv_tiles_to_classes(map):
         for x in range(wfc.SIZE_X): 
             newtile = tile(x*offsetx,start_y+(y*offsety),map[y][x])
             map[y][x] = newtile
-            if newtile.ID == wfc.TILE_ID["O_WALL"] or newtile.ID == wfc.TILE_ID["VOID"]:
+            if newtile.ID == wfc.TILE_ID["O_WALL"] or newtile.ID == wfc.TILE_ID["VOID"] or newtile.ID == wfc.TILE_ID["ENTER"]:
                 newitem = tilelist()
                 newitem.tile = newtile
+                if newtile.ID == wfc.TILE_ID["ENTER"]:
+                    newtile.collbox = pygame.Rect.move(newtile.collbox, 0, STILES[1])
+                    print(newtile.collbox)
                 collisionslist[TILE_TYPES["impass"]] = addtolist(collisionslist[TILE_TYPES["impass"]], newitem)
             elif newtile.ID == wfc.TILE_ID["HOLY"]:
                 newitem = tilelist()
@@ -205,7 +208,7 @@ def draw_map(maplist, mapnum):
         for x in range(wfc.SIZE_X):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
-                #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] :
+                #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
                 #   pygame.draw.rect(win, (255,0,0), map[y][x].collbox)
 
 def redraw(map_list, map_num, duck):
