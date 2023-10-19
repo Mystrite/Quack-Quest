@@ -14,7 +14,7 @@ SCREEN = (SWIDTH, SHEIGHT)
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
 
 fontlist = pygame.font.get_fonts()
-print(fontlist)
+
 fonts = {
     "menubutton" : pygame.font.SysFont("ebrima", 45),
     "chambercard" : pygame.font.SysFont("algerian", 100)
@@ -24,6 +24,15 @@ button_icons = {
     "green_forward" : pygame.image.load('./A-Level-NEA-new/assets/GreenArrow.png'),
     "grey_forward"  : pygame.image.load('./A-Level-NEA-new/assets/GreyedGreenArrow.png')
 }
+
+TILE_TYPES = {
+    "destruction" : 0, 
+    "hurt" : 1,
+    "impass" : 2,    
+    "heal" : 3,
+    "exit" : 4
+}
+
 
 tile_icons = [None] * len(wfc.TILE_ID)
 for id in range(len(wfc.TILE_ID)):
@@ -77,13 +86,10 @@ class tile:     # switch tile classes to inheritance??
         self.x = x
         self.y = y
         self.size = STILES
-        self.impassable = False
-        self.damages = False
-        self.heals = False
         self.image = pygame.transform.scale(tile_icons[self.ID], self.size) 
         self.collbox = pygame.Rect(self.x, self.y, self.size[0], self.size[1]) # could only create for specified types.
 
-class impassablelist:
+class tilelist:
     def __init__(self):
         self.tile = None
         self.next = None
@@ -92,7 +98,7 @@ class player:
     def __init__(self):
         self.x = 50
         self.y = 50
-        self.vel = 1
+        self.vel = 2
         self.health = 100
         self.direction = "UP"
         self.icons = {
@@ -101,7 +107,7 @@ class player:
             "LEFT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png'),
             "RIGHT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
         }
-        self.rect = pygame.Rect(self.x, self.y, 32, 32)
+        self.rect = pygame.Rect(self.x+16, self.y+16, 32, 32)
 
     def checkcollide(self, tiletype):
         temp = tiletype
@@ -117,35 +123,35 @@ class player:
         if self.direction == "UP":
             self.y -= self.vel
             self.rect = pygame.Rect.move(self.rect, 0, -self.vel)
-            if self.checkcollide(col_list[wfc.TILE_ID["O_WALL"]]):
+            if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
                 self.y += self.vel
                 self.rect = pygame.Rect.move(self.rect, 0, self.vel)
 
         elif self.direction == "DOWN":
             self.y += self.vel
             self.rect = pygame.Rect.move(self.rect, 0, self.vel) 
-            if self.checkcollide(col_list[wfc.TILE_ID["O_WALL"]]):
+            if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
                 self.y -= self.vel
                 self.rect = pygame.Rect.move(self.rect, 0, -self.vel) 
 
         elif self.direction == "LEFT":
             self.x -= self.vel
             self.rect = pygame.Rect.move(self.rect, -self.vel, 0)
-            if self.checkcollide(col_list[wfc.TILE_ID["O_WALL"]]):
+            if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
                 self.x += self.vel
                 self.rect = pygame.Rect.move(self.rect, self.vel, 0) 
             
         elif self.direction == "RIGHT":
             self.x += self.vel
             self.rect = pygame.Rect.move(self.rect, self.vel, 0)
-            if self.checkcollide(col_list[wfc.TILE_ID["O_WALL"]]):
+            if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
                 self.x -= self.vel
                 self.rect = pygame.Rect.move(self.rect, -self.vel, 0) 
 
 
     def draw(self):
         win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
-        pygame.draw.rect(win, (255,0,0), self.rect)
+        # pygame.draw.rect(win, (255,0,0), self.rect)
 
 def addtolist(head, new):
     if head == None:
@@ -163,20 +169,33 @@ def conv_tiles_to_classes(map):
     start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
     offsetx = SWIDTH/wfc.SIZE_X
     offsety = offsetx
-    impass_list = None
-    collisionslist = [None]*len(wfc.TILE_ID)
+    collisionslist = [None]*len(TILE_TYPES)
     for y in range(wfc.SIZE_Y):
         for x in range(wfc.SIZE_X): 
-            map[y][x] = tile(x*offsetx,start_y+(y*offsety),map[y][x])
-            if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] :
-                map[y][x].impassable = True
-                newitem = impassablelist()
-                newitem.tile = map[y][x]
-                impass_list = addtolist(impass_list, newitem)
-                # outlist(impass_list)
- 
-    collisionslist[wfc.TILE_ID["O_WALL"]] = impass_list
-    print(collisionslist)
+            newtile = tile(x*offsetx,start_y+(y*offsety),map[y][x])
+            map[y][x] = newtile
+            if newtile.ID == wfc.TILE_ID["O_WALL"] or newtile.ID == wfc.TILE_ID["VOID"]:
+                newitem = tilelist()
+                newitem.tile = newtile
+                collisionslist[TILE_TYPES["impass"]] = addtolist(collisionslist[TILE_TYPES["impass"]], newitem)
+            elif newtile.ID == wfc.TILE_ID["HOLY"]:
+                newitem = tilelist()
+                newitem.tile = newtile
+                collisionslist[TILE_TYPES["heal"]] = addtolist(collisionslist[TILE_TYPES["heal"]], newitem)
+            elif newtile.ID == wfc.TILE_ID["ROCK"]:
+                newitem = tilelist()
+                newitem.tile = newtile
+                collisionslist[TILE_TYPES["destruction"]] = addtolist(collisionslist[TILE_TYPES["destruction"]], newitem)
+            elif newtile.ID == wfc.TILE_ID["LAVA"]:
+                newitem = tilelist()
+                newitem.tile = newtile
+                collisionslist[TILE_TYPES["hurt"]] = addtolist(collisionslist[TILE_TYPES["hurt"]], newitem)
+            elif newtile.ID == wfc.TILE_ID["EXIT"]:
+                newitem = tilelist()
+                newtile.collbox = pygame.Rect.move(newtile.collbox, 0, -newtile.size[1]*0.9)
+                newitem.tile = newtile
+                collisionslist[TILE_TYPES["exit"]] = addtolist(collisionslist[TILE_TYPES["exit"]], newitem)
+
     return collisionslist 
 
 def draw_map(maplist, mapnum):
@@ -184,8 +203,8 @@ def draw_map(maplist, mapnum):
         for x in range(wfc.SIZE_X):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
-                if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] :
-                    pygame.draw.rect(win, (255,0,0), map[y][x].collbox)
+                #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] :
+                #    pygame.draw.rect(win, (255,0,0), map[y][x].collbox)
 
 def redraw(map_list, map_num, duck):
     draw_map(map_list, map_num)
@@ -306,15 +325,15 @@ def game():
 
 
 def dungeon(maplist, map_num, duck):
-    clock.tick(30)
+    clock.tick(15)
     run = True
     wfc.outgrid(maplist[map_num], wfc.SIZE_X, wfc.SIZE_Y)
     collist = conv_tiles_to_classes(maplist[map_num])
-    outlist(collist[8])
     for i in range(wfc.SIZE_X):
         if maplist[map_num][wfc.SIZE_Y-1][i].ID == wfc.TILE_ID["ENTER"]:
             duck.x = maplist[map_num][wfc.SIZE_Y-1][i].x
             duck.y = maplist[map_num][wfc.SIZE_Y-1][i].y
+            duck.rect = pygame.Rect(duck.x+16, duck.y+16, 32, 32)
 
     while run:
         if duck.health == 0:
@@ -335,6 +354,15 @@ def dungeon(maplist, map_num, duck):
             duck.move("UP", collist)
         elif keys[pygame.K_DOWN]:
             duck.move("DOWN", collist)
+
+        if duck.checkcollide(collist[TILE_TYPES["hurt"]]):
+            duck.health -= 0.2
+            print(duck.health)
+        if duck.checkcollide(collist[TILE_TYPES["heal"]]) and duck.health < 100:
+            duck.health += 0.15
+            print(duck.health)
+        if duck.checkcollide(collist[TILE_TYPES["exit"]]):
+            return True
 
         redraw(maplist, map_num, duck)
 
