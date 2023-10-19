@@ -69,7 +69,7 @@ class inputbox(centrebutton):
         drawtext(text, font, colour, win, self.x+30, (self.y)+self.height//5)
 
 class clickablebutton:
-    def __init__(self, x, y, size, icon): # unfinished!!
+    def __init__(self, x, y, size, icon): 
         self.x = x
         self.y = y
         self.size = size
@@ -107,7 +107,7 @@ class player:
             "LEFT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png'),
             "RIGHT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
         }
-        self.rect = pygame.Rect(self.x+16, self.y+16, 32, 32)
+        self.rect = pygame.Rect(self.x+STILES[0]//4, self.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
 
     def checkcollide(self, tiletype):
         temp = tiletype
@@ -151,7 +151,9 @@ class player:
 
     def draw(self):
         win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
-        # pygame.draw.rect(win, (255,0,0), self.rect)
+        #pygame.draw.rect(win, (255,0,0), self.rect)
+
+
 
 def addtolist(head, new):
     if head == None:
@@ -204,7 +206,7 @@ def draw_map(maplist, mapnum):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
                 #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] :
-                #    pygame.draw.rect(win, (255,0,0), map[y][x].collbox)
+                #   pygame.draw.rect(win, (255,0,0), map[y][x].collbox)
 
 def redraw(map_list, map_num, duck):
     draw_map(map_list, map_num)
@@ -333,10 +335,10 @@ def dungeon(maplist, map_num, duck):
         if maplist[map_num][wfc.SIZE_Y-1][i].ID == wfc.TILE_ID["ENTER"]:
             duck.x = maplist[map_num][wfc.SIZE_Y-1][i].x
             duck.y = maplist[map_num][wfc.SIZE_Y-1][i].y
-            duck.rect = pygame.Rect(duck.x+16, duck.y+16, 32, 32)
+            duck.rect = pygame.Rect(duck.x+STILES[0]//4, duck.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
 
     while run:
-        if duck.health == 0:
+        if duck.health < 0:
             return False
         
         for event in pygame.event.get():
