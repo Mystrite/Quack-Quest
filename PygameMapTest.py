@@ -3,7 +3,10 @@ import random
 import WFC_Test_2 as wfc
 import re
 import time
+import os
 
+curpath = os.getcwd()
+curpath = curpath.replace("\\","/")
 
 pygame.init()
 GRIDS_LIST, NUM_MAPS = wfc.generate()
@@ -21,8 +24,8 @@ fonts = {
 }
 
 button_icons = {
-    "green_forward" : pygame.image.load('./A-Level-NEA-new/assets/GreenArrow.png'),
-    "grey_forward"  : pygame.image.load('./A-Level-NEA-new/assets/GreyedGreenArrow.png')
+    "green_forward" : pygame.image.load(curpath+'/assets/GreenArrow.png'),
+    "grey_forward"  : pygame.image.load(curpath+'/assets/GreyedGreenArrow.png')
 }
 
 TILE_TYPES = {
@@ -36,7 +39,7 @@ TILE_TYPES = {
 
 tile_icons = [None] * len(wfc.TILE_ID)
 for id in range(len(wfc.TILE_ID)):
-    tile_icons[id] =  pygame.image.load('./A-Level-NEA-new/assets/TILE_%s_placeholder.png' % id)
+    tile_icons[id] =  pygame.image.load(curpath+'/assets/TILE_%s_placeholder.png' % id)
 
 win = pygame.display.set_mode(SCREEN)
 
