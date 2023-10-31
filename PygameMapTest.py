@@ -7,10 +7,9 @@ import os
 from math import ceil
 
 curpath = os.getcwd()
-curpath = curpath.replace("\\","/")
+#curpath = curpath.replace("\\","/")
 
 pygame.init()
-GRIDS_LIST, NUM_MAPS = wfc.generate()
 dispInfObj = pygame.display.Info()
 SWIDTH = dispInfObj.current_w
 SHEIGHT = dispInfObj.current_h
@@ -36,6 +35,10 @@ button_icons = {
     "green_forward" : pygame.image.load(curpath+'/assets/GreenArrow.png'),
     "grey_forward"  : pygame.image.load(curpath+'/assets/GreyedGreenArrow.png')
 }
+
+misc_assets = {
+    "background" : pygame.transform.scale(pygame.image.load(curpath+"/assets/background.png"), (SWIDTH, SHEIGHT))
+    }
 
 TILE_TYPES = {
     "destruction" : 0, 
@@ -164,7 +167,7 @@ class player:
 
     def draw(self):
         win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
-        #pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - DUCK HITBOX
+        pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - DUCK HITBOX
 
 
 
@@ -244,8 +247,10 @@ def redraw(map_list, map_num, duck, start_time):
 def main_menu():
     clock.tick(15)
     running = True
-    
+    win.blit(misc_assets["background"], (0,0))
+
     while running:
+
         mx, my = pygame.mouse.get_pos()
 
         click = False
@@ -262,7 +267,7 @@ def main_menu():
                 if event.button == 1:
                     click = True
                     
-        win.fill(colours["cyan"])
+
         drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, SWIDTH*0.5, SHEIGHT*0.1)
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
         leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
@@ -285,7 +290,7 @@ def name_select():
     validname = False
     box = inputbox(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
     progress_button = clickablebutton((box.x + box.width + 25), box.y , (box.height, box.height), button_icons["grey_forward"])
-    
+    win.blit(misc_assets["background"], (0,0))
     while running:
         mx, my = pygame.mouse.get_pos()
         click = False
