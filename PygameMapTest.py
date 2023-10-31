@@ -105,10 +105,10 @@ class player:
         self.health = 100
         self.direction = "UP"
         self.icons = {
-            "UP" : pygame.image.load('./A-Level-NEA-new/assets/Duck_UP.png'),
-            "DOWN" : pygame.image.load('./A-Level-NEA-new/assets/Duck_DOWN.png'),
-            "LEFT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_LEFT.png'),
-            "RIGHT" : pygame.image.load('./A-Level-NEA-new/assets/Duck_RIGHT.png')
+            "UP" : pygame.image.load(curpath+'/assets/Duck_UP.png'),
+            "DOWN" : pygame.image.load(curpath+'/assets/Duck_DOWN.png'),
+            "LEFT" : pygame.image.load(curpath+'/assets/Duck_LEFT.png'),
+            "RIGHT" : pygame.image.load(curpath+'/assets/Duck_RIGHT.png')
         }
         self.rect = pygame.Rect(self.x+STILES[0]//4, self.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
 
@@ -214,7 +214,14 @@ def draw_map(maplist, mapnum):
                 #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
                 #   pygame.draw.rect(win, (255,0,0), map[y][x].collbox)
 
-def redraw(map_list, map_num, duck):
+def draw_hud(mapnum, health, start_time):
+    pygame.draw.rect(win, (0,0,0), pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
+    drawtext("Chamber %s" % (mapnum+1), fonts["menubutton"], (255,255,255), win, 0, 0)
+    curtime = round(time.time() - start_time, 2)
+    drawtext(str(curtime), fonts["menubutton"], (255,255,255), win, 0, SHEIGHT*0.05)
+
+def redraw(map_list, map_num, duck, start_time):
+    draw_hud(map_num, duck.health, start_time)
     draw_map(map_list, map_num)
     duck.draw()
     pygame.display.update()
@@ -269,26 +276,10 @@ def name_select():
         click = False
 
         for event in pygame.event.get():
+
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()  
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-
-                elif event.key == pygame.K_BACKSPACE:
-                    name = name[:-1]
-                elif len(name) <= 15:
-                    name += event.unicode
-
-                if re.search("^\w*$", name) and name != "":
-                    validname = True
-                    progress_button.icon = button_icons["green_forward"]
-                else:
-                    validname = False
-                    progress_button.icon = button_icons["grey_forward"]
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
@@ -298,6 +289,26 @@ def name_select():
                     game()
                 elif click:
                     print("invalid")
+                    
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+                elif event.key == pygame.K_BACKSPACE:
+                    name = name[:-1]
+                elif len(name) <= 15 and event.key != pygame.K_RETURN:
+                    name += event.unicode
+
+                if re.search("^\w*$", name) and name != "":
+                    validname = True
+                    progress_button.icon = button_icons["green_forward"]
+                else:
+                    validname = False
+                    progress_button.icon = button_icons["grey_forward"]
+
+            
+
+            
 
         box.filltext(name, fonts["menubutton"], (255,255,255), win)
         progress_button.draw()
@@ -314,6 +325,7 @@ def game():
     progress = False
     newduck = player()
     GRIDS_LIST, NUM_MAPS = wfc.generate()
+    start_time = time.time()
 
     while alive == True and hasWon == False:
         win.fill((0,0,0))
@@ -321,7 +333,7 @@ def game():
         pygame.display.update()
 
         time.sleep(3)
-        progress = dungeon(GRIDS_LIST, map_num, newduck)
+        progress = dungeon(GRIDS_LIST, map_num, newduck, start_time)
 
         if progress == False:
             alive = False
@@ -332,7 +344,7 @@ def game():
             hasWon = True
 
 
-def dungeon(maplist, map_num, duck):
+def dungeon(maplist, map_num, duck, start_time):
     clock.tick(15)
     run = True
     wfc.outgrid(maplist[map_num], wfc.SIZE_X, wfc.SIZE_Y)
@@ -372,7 +384,7 @@ def dungeon(maplist, map_num, duck):
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
 
-        redraw(maplist, map_num, duck)
+        redraw(maplist, map_num, duck, start_time)
 
 if __name__ == "__main__":
     main_menu()
