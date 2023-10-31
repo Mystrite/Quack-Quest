@@ -20,7 +20,7 @@ weight_matrix = [
    # FLOOR      LAVA        HOLY        ROCK        VOID      EXIT    ENTER   NONE    O_WALL        MATRIX OF TILE WEIGHTINGS, -1 = CANNOT GENERATE
     [500,        35,          0,        100,         75,      -1,     -1,     -1,     -1],         # FLOOR              HORIZONTAL = ORIGINAL TILE
     [0,         350,         -1,         25,         25,      -1,     -1,     -1,     -1],         # LAVA
-    [100,        -1,        125,        250,        100,      -1,     -1,     -1,     -1],         # HOLY
+    [100,        -1,        125,        350,        100,      -1,     -1,     -1,     -1],         # HOLY
     [180,       150,         25,        250,         50,      -1,     -1,     -1,     -1],         # ROCK
     [350,        50,         25,         25,        300,      -1,     -1,     -1,     -1],         # VOID
     [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1],         # EXIT
