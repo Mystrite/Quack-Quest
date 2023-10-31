@@ -58,13 +58,13 @@ pygame.display.set_caption("very cool epic game for cool people")
 
 clock = pygame.time.Clock()
 
-def drawtext(text, font, colour, screen, x, y):
+def drawtext(text, font, colour, screen, x, y): # general func displays text 
     object = font.render(text, 1, colour)
     textrect = object.get_rect()
     textrect.topleft = (x, y)
     screen.blit(object, textrect)
 
-class  centrebutton:
+class  centrebutton:    # class defining a rectangle button at the centre of the screen
     def __init__(self, width, height, y):
         self.width = width
         self.height = height
@@ -72,17 +72,17 @@ class  centrebutton:
         self.y = y
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-    def filltext(self, text, font, colour, win):
+    def filltext(self, text, font, colour, win):    # fills centrebutton objetc with given text
         pygame.draw.rect(win, colours["red"], self.rect)
         drawtext(text, font, colour, win, self.x+self.width*0.5-(len(text)*12), (self.y)+self.height//5)
     
     
-class inputbox(centrebutton):
+class inputbox(centrebutton):   # creates a box inwhich player inputted text is displayed
     def filltext(self, text, font, colour, win):
         pygame.draw.rect(win, colours["red"], self.rect)
         drawtext(text, font, colour, win, self.x+30, (self.y)+self.height//5)
 
-class clickablebutton:
+class clickablebutton:  # defines a button which can be clicked on
     def __init__(self, x, y, size, icon): 
         self.x = x
         self.y = y
@@ -94,16 +94,16 @@ class clickablebutton:
         self.icon = pygame.transform.scale(self.icon, self.size) 
         win.blit(self.icon, (self.x, self.y))
     
-class tile:     # switch tile classes to inheritance??
+class tile:     # defines properties of any given tiles
     def __init__(self, x, y, ID):
         self.ID = ID
         self.x = x
         self.y = y
         self.size = STILES
         self.image = pygame.transform.scale(tile_icons[self.ID], self.size) 
-        self.collbox = pygame.Rect(self.x, self.y, self.size[0], self.size[1]) # could only create for specified types.
+        self.collbox = pygame.Rect(self.x, self.y, self.size[0], self.size[1]) 
 
-class tilelist:
+class tilelist: # linked list which contains tiles
     def __init__(self):
         self.tile = None
         self.next = None
