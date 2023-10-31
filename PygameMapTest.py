@@ -4,6 +4,7 @@ import WFC_Test_2 as wfc
 import re
 import time
 import os
+from math import ceil
 
 curpath = os.getcwd()
 curpath = curpath.replace("\\","/")
@@ -17,6 +18,14 @@ SCREEN = (SWIDTH, SHEIGHT)
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
 
 fontlist = pygame.font.get_fonts()
+
+colours = {
+    "red" : (255,0,0),
+    "green" : (0,255,0),
+    "black" : (0,0,0),
+    "white" : (255,255,255),
+    "cyan" : (0,190,255)
+}
 
 fonts = {
     "menubutton" : pygame.font.SysFont("ebrima", 45),
@@ -62,13 +71,13 @@ class  centrebutton:
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def filltext(self, text, font, colour, win):
-        pygame.draw.rect(win, (255,0,0), self.rect)
+        pygame.draw.rect(win, colours["red"], self.rect)
         drawtext(text, font, colour, win, self.x+self.width*0.5-(len(text)*12), (self.y)+self.height//5)
     
     
 class inputbox(centrebutton):
     def filltext(self, text, font, colour, win):
-        pygame.draw.rect(win, (255,0,0), self.rect)
+        pygame.draw.rect(win, colours["red"], self.rect)
         drawtext(text, font, colour, win, self.x+30, (self.y)+self.height//5)
 
 class clickablebutton:
@@ -101,8 +110,9 @@ class player:
     def __init__(self):
         self.x = 50
         self.y = 50
-        self.vel = 2
-        self.health = 100
+        self.vel = 1
+        self.maxhealth = 1000
+        self.health = self.maxhealth
         self.direction = "UP"
         self.icons = {
             "UP" : pygame.image.load(curpath+'/assets/Duck_UP.png'),
@@ -154,7 +164,7 @@ class player:
 
     def draw(self):
         win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
-        # pygame.draw.rect(win, (255,0,0), self.rect) # DEBUG - DUCK HITBOX
+        #pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - DUCK HITBOX
 
 
 
@@ -184,7 +194,7 @@ def conv_tiles_to_classes(map):
                 newitem.tile = newtile
                 if newtile.ID == wfc.TILE_ID["ENTER"]:
                     newtile.collbox = pygame.Rect.move(newtile.collbox, 0, STILES[1])
-                    print(newtile.collbox)
+
                 collisionslist[TILE_TYPES["impass"]] = addtolist(collisionslist[TILE_TYPES["impass"]], newitem)
             elif newtile.ID == wfc.TILE_ID["HOLY"]:
                 newitem = tilelist()
@@ -212,16 +222,21 @@ def draw_map(maplist, mapnum):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
                 #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
-                #   pygame.draw.rect(win, (255,0,0), map[y][x].collbox)
+                #   pygame.draw.rect(win, colours["red"], map[y][x].collbox)
 
-def draw_hud(mapnum, health, start_time):
-    pygame.draw.rect(win, (0,0,0), pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
-    drawtext("Chamber %s" % (mapnum+1), fonts["menubutton"], (255,255,255), win, 0, 0)
+def draw_hud(mapnum, duck, start_time):
+    pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
+    drawtext("Chamber %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 0, 0)
     curtime = round(time.time() - start_time, 2)
-    drawtext(str(curtime), fonts["menubutton"], (255,255,255), win, 0, SHEIGHT*0.05)
+    drawtext(str(curtime), fonts["menubutton"], colours["white"], win, 0, SHEIGHT*0.05)
+
+    ratio = duck.health/duck.maxhealth
+    pygame.draw.rect(win, colours["red"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25, SHEIGHT*0.05))
+    pygame.draw.rect(win, colours["green"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25*ratio, SHEIGHT*0.05))  
+    drawtext("%s/%s" % (ceil(duck.health/10), duck.maxhealth//10), fonts["menubutton"], colours["white"], win, SWIDTH*0.7, 0)
 
 def redraw(map_list, map_num, duck, start_time):
-    draw_hud(map_num, duck.health, start_time)
+    draw_hud(map_num, duck, start_time)
     draw_map(map_list, map_num)
     duck.draw()
     pygame.display.update()
@@ -247,8 +262,8 @@ def main_menu():
                 if event.button == 1:
                     click = True
                     
-        win.fill((0,190,255))
-        drawtext("Quack Quest", fonts["menubutton"], (255,255,255), win, SWIDTH*0.5, SHEIGHT*0.1)
+        win.fill(colours["cyan"])
+        drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, SWIDTH*0.5, SHEIGHT*0.1)
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
         leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
         
@@ -259,8 +274,8 @@ def main_menu():
             if click:
                 leaderboard()
 
-        start_button.filltext("Start Game", fonts["menubutton"], (255,255,255), win)
-        leader_button.filltext("Leaderboard", fonts["menubutton"], (255,255,255), win)
+        start_button.filltext("Start Game", fonts["menubutton"], colours["white"], win)
+        leader_button.filltext("Leaderboard", fonts["menubutton"], colours["white"], win)
         pygame.display.update()
 
 def name_select():
@@ -310,7 +325,7 @@ def name_select():
 
             
 
-        box.filltext(name, fonts["menubutton"], (255,255,255), win)
+        box.filltext(name, fonts["menubutton"], colours["white"], win)
         progress_button.draw()
         pygame.display.flip()
 
@@ -328,7 +343,7 @@ def game():
     start_time = time.time()
 
     while alive == True and hasWon == False:
-        win.fill((0,0,0))
+        win.fill(colours["black"])
         drawtext("Chamber %s" % str(map_num+1), fonts["chambercard"], (255,255,255), win, SWIDTH//2-300,SHEIGHT//2-100)
         pygame.display.update()
 
@@ -337,17 +352,17 @@ def game():
 
         if progress == False:
             alive = False
+        elif map_num+1 == NUM_MAPS:
+            hasWon = True
         else:
             map_num += 1
+    print("yippe!")
 
-        if map_num > NUM_MAPS:
-            hasWon = True
-
+        
 
 def dungeon(maplist, map_num, duck, start_time):
     clock.tick(15)
     run = True
-    wfc.outgrid(maplist[map_num], wfc.SIZE_X, wfc.SIZE_Y)
     collist = conv_tiles_to_classes(maplist[map_num])
     for i in range(wfc.SIZE_X):
         if maplist[map_num][wfc.SIZE_Y-1][i].ID == wfc.TILE_ID["ENTER"]:
@@ -356,7 +371,7 @@ def dungeon(maplist, map_num, duck, start_time):
             duck.rect = pygame.Rect(duck.x+STILES[0]//4, duck.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
 
     while run:
-        if duck.health < 0:
+        if duck.health <= 0:
             return False
         
         for event in pygame.event.get():
@@ -376,11 +391,12 @@ def dungeon(maplist, map_num, duck, start_time):
             duck.move("DOWN", collist)
 
         if duck.checkcollide(collist[TILE_TYPES["hurt"]]):
-            duck.health -= 0.2
-            print(duck.health)
-        if duck.checkcollide(collist[TILE_TYPES["heal"]]) and duck.health < 100:
-            duck.health += 0.15
-            print(duck.health)
+            duck.health -= 2
+
+        if duck.checkcollide(collist[TILE_TYPES["heal"]]) and duck.health < duck.maxhealth:
+            duck.health += 1
+
+
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
 
