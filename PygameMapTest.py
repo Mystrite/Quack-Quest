@@ -7,18 +7,17 @@ import os
 from math import ceil
 
 curpath = os.getcwd()
-#curpath = curpath.replace("\\","/")
 
 pygame.init()
-dispInfObj = pygame.display.Info()
-SWIDTH = dispInfObj.current_w
-SHEIGHT = dispInfObj.current_h
-SCREEN = (SWIDTH, SHEIGHT)
-STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)
+dispInfObj = pygame.display.Info()  # resolution of screen, for debugging purposes
+SWIDTH = dispInfObj.current_w   # width of screen
+SHEIGHT = dispInfObj.current_h  # height of screen
+SCREEN = (SWIDTH, SHEIGHT)  # width and height stored as tuple
+STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)   # size of tiles tuple
 
 fontlist = pygame.font.get_fonts()
 
-colours = {
+colours = { # dict with reference 
     "red" : (255,0,0),
     "green" : (0,255,0),
     "black" : (0,0,0),
@@ -26,21 +25,21 @@ colours = {
     "cyan" : (0,190,255)
 }
 
-fonts = {
+fonts = {   # dict with fonts
     "menubutton" : pygame.font.SysFont("ebrima", 45),
     "chambercard" : pygame.font.SysFont("algerian", 100)
 }
 
-button_icons = {
+button_icons = { # dict with icons for buttons
     "green_forward" : pygame.image.load(curpath+'/assets/GreenArrow.png'),
     "grey_forward"  : pygame.image.load(curpath+'/assets/GreyedGreenArrow.png')
 }
 
-misc_assets = {
-    "background" : pygame.transform.scale(pygame.image.load(curpath+"/assets/background.png"), (SWIDTH, SHEIGHT))
+misc_assets = { # dict for miscellanious assets
+    "background" : pygame.transform.scale(pygame.image.load(curpath+"/assets/background.png"), SCREEN)
     }
 
-TILE_TYPES = {
+TILE_TYPES = {  # IDs for types of tiles (e.g. damage dealing ones)
     "destruction" : 0, 
     "hurt" : 1,
     "impass" : 2,    
@@ -49,8 +48,8 @@ TILE_TYPES = {
 }
 
 
-tile_icons = [None] * len(wfc.TILE_ID)
-for id in range(len(wfc.TILE_ID)):
+tile_icons = [None] * len(wfc.TILE_ID)    
+for id in range(len(wfc.TILE_ID)):      # loads tile assets and associates them with the correct ID
     tile_icons[id] =  pygame.image.load(curpath+'/assets/TILE_%s_placeholder.png' % id)
 
 win = pygame.display.set_mode(SCREEN)
@@ -326,10 +325,6 @@ def name_select():
                     validname = False
                     progress_button.icon = button_icons["grey_forward"]
 
-            
-
-            
-
         box.filltext(name, fonts["menubutton"], colours["white"], win)
         progress_button.draw()
         pygame.display.flip()
@@ -387,7 +382,6 @@ def dungeon(maplist, map_num, duck, start_time):
 
         if keys[pygame.K_LEFT]:
             duck.move("LEFT", collist)
-
         elif keys[pygame.K_RIGHT]:
             duck.move("RIGHT", collist)
         elif keys[pygame.K_UP]:
@@ -397,11 +391,8 @@ def dungeon(maplist, map_num, duck, start_time):
 
         if duck.checkcollide(collist[TILE_TYPES["hurt"]]):
             duck.health -= 2
-
         if duck.checkcollide(collist[TILE_TYPES["heal"]]) and duck.health < duck.maxhealth:
             duck.health += 1
-
-
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
 
