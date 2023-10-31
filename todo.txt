@@ -1,7 +1,6 @@
 TO DO:
 	-implement some idea of preset rooms?	[might just not]
-	-clickable button class
-		-different kinds can inherit as fit
+	-restructure duck class such that it inherits from new entity class, used for bullets and enemies etc. needed for collision code.
 	-leaderboard system
 	-the game.
 	^\w*$
