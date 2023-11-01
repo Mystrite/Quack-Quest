@@ -70,7 +70,6 @@ def adjcheck(id , x, y):
 
 
 def germinate():
-  contradiction = False
   contarr = [False]*3
   for i in range(1, gridsize):
     for j in range(1, gridsize):
@@ -83,7 +82,6 @@ def germinate():
         allow = adjcheck(newid, j, i)
       print("####################################")
       if contarr[0] == True and contarr[1] == True and contarr[2] == True and allow == False:
-        contradiction = True
         outgrid(grid)
         print("Contradiction Reached, tried to add %s at %s,%s" % (newid, j, i))
         quit()
