@@ -108,14 +108,40 @@ class tilelist: # linked list which contains tiles
         self.tile = None
         self.next = None
 
-class player:
+class entity:
     def __init__(self):
-        self.x = 50
-        self.y = 50
-        self.vel = 1
+        self.x = 0
+        self.y = 0
+        self.sVel = 0
+        self.size = STILES
+        self.rect = pygame.rect(self.x, self.y, self.size[0], self.size[1])
+        self.icon = None
+
+    def checkcollide(self, tiletype):
+                temp = tiletype
+                while temp != None:
+                    docollide = self.rect.colliderect(temp.tile.collbox)
+                    if docollide:
+                        return docollide
+                    temp = temp.next
+                return False
+
+    def draw(self):
+            win.blit(pygame.transform.scale(self.icons[self.direction], self.size), (self.x,self.y))
+            pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - HITBOX
+
+class projectile(entity):
+    def __init__(self, vel):
+        self.vel = vel
+        self.icon = None
+
+class sentient(entity):
+
+class player(sentient):
+    def __init__(self):
+        self.sVel = 1
         self.maxhealth = 1000
         self.health = self.maxhealth
-        self.direction = "UP"
         self.icons = {
             "UP" : pygame.image.load(curpath+'/assets/Duck_UP.png'),
             "DOWN" : pygame.image.load(curpath+'/assets/Duck_DOWN.png'),
@@ -123,50 +149,39 @@ class player:
             "RIGHT" : pygame.image.load(curpath+'/assets/Duck_RIGHT.png')
         }
         self.rect = pygame.Rect(self.x+STILES[0]//4, self.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
-
-    def checkcollide(self, tiletype):
-        temp = tiletype
-        while temp != None:
-            docollide = self.rect.colliderect(temp.tile.collbox)
-            if docollide:
-                return docollide
-            temp = temp.next
-        return False
+        self.pVel = 15
 
     def move(self, newdir, col_list):
         self.direction = newdir
         if self.direction == "UP":
-            self.y -= self.vel
-            self.rect = pygame.Rect.move(self.rect, 0, -self.vel)
+            self.y -= self.sVel
+            self.rect = pygame.Rect.move(self.rect, 0, -self.sVel)
             if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
-                self.y += self.vel
-                self.rect = pygame.Rect.move(self.rect, 0, self.vel)
+                self.y += self.sVel
+                self.rect = pygame.Rect.move(self.rect, 0, self.sVel)
 
         elif self.direction == "DOWN":
-            self.y += self.vel
-            self.rect = pygame.Rect.move(self.rect, 0, self.vel) 
+            self.y += self.sVel
+            self.rect = pygame.Rect.move(self.rect, 0, self.sVel) 
             if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
-                self.y -= self.vel
-                self.rect = pygame.Rect.move(self.rect, 0, -self.vel) 
+                self.y -= self.sVel
+                self.rect = pygame.Rect.move(self.rect, 0, -self.sVel) 
 
         elif self.direction == "LEFT":
-            self.x -= self.vel
-            self.rect = pygame.Rect.move(self.rect, -self.vel, 0)
+            self.x -= self.sVel
+            self.rect = pygame.Rect.move(self.rect, -self.sVel, 0)
             if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
-                self.x += self.vel
-                self.rect = pygame.Rect.move(self.rect, self.vel, 0) 
+                self.x += self.sVel
+                self.rect = pygame.Rect.move(self.rect, self.sVel, 0) 
             
         elif self.direction == "RIGHT":
-            self.x += self.vel
-            self.rect = pygame.Rect.move(self.rect, self.vel, 0)
+            self.x += self.sVel
+            self.rect = pygame.Rect.move(self.rect, self.sVel, 0)
             if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
-                self.x -= self.vel
-                self.rect = pygame.Rect.move(self.rect, -self.vel, 0) 
+                self.x -= self.sVel
+                self.rect = pygame.Rect.move(self.rect, -self.sVel, 0) 
 
-
-    def draw(self):
-        win.blit(pygame.transform.scale(self.icons[self.direction], STILES), (self.x,self.y))
-        pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - DUCK HITBOX
+    
 
 
 
