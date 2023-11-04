@@ -58,11 +58,39 @@ pygame.display.set_caption("very cool epic game for cool people")
 
 clock = pygame.time.Clock()
 
+### UTILITIES ###
+
+def addtolist(head, new):
+    if head == None:
+        return new
+    new.next = head
+    return new
+
+def removefromlist(head, target):
+    if head == target: 
+        return head.next
+    temp = head
+    while temp != None:
+        prev = temp
+        temp = temp.next
+        if temp == target:
+            prev.next = temp.next
+            return head
+    return head
+
+def outlist(head):
+    temp = head
+    while temp != None:
+        print(temp.tile.ID, temp.tile.x, temp.tile.y, temp.tile.collbox)
+        temp = temp.next
+
 def drawtext(text, font, colour, screen, x, y): # general func displays text 
     object = font.render(text, 1, colour)
     textrect = object.get_rect()
     textrect.topleft = (x, y)
     screen.blit(object, textrect)
+
+### CLASSES ###
 
 class  centrebutton:    # class defining a rectangle button at the centre of the screen
     def __init__(self, width, height, y):
@@ -76,7 +104,7 @@ class  centrebutton:    # class defining a rectangle button at the centre of the
         pygame.draw.rect(win, colours["red"], self.rect)
         drawtext(text, font, colour, win, self.x+self.width*0.5-(len(text)*12), (self.y)+self.height//5)
     
-    
+
 class inputbox(centrebutton):   # creates a box inwhich player inputted text is displayed
     def filltext(self, text, font, colour, win):
         pygame.draw.rect(win, colours["red"], self.rect)
@@ -108,14 +136,20 @@ class tilelist: # linked list which contains tiles
         self.tile = None
         self.next = None
 
+class projlist:
+    def __init__(self):
+        self.proj = None
+        self.next = None
+
 class entity:
     def __init__(self):
         self.x = 0
         self.y = 0
         self.sVel = 0
         self.size = STILES
-        self.rect = pygame.rect(self.x, self.y, self.size[0], self.size[1])
+        self.rect = pygame.Rect(self.x, self.y, self.size[0], self.size[1])
         self.icon = None
+        self.direction = "UP"
 
     def checkcollide(self, tiletype):
                 temp = tiletype
@@ -127,18 +161,78 @@ class entity:
                 return False
 
     def draw(self):
-            win.blit(pygame.transform.scale(self.icons[self.direction], self.size), (self.x,self.y))
+            win.blit(pygame.transform.scale(self.icon, self.size), (self.x,self.y))
             pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - HITBOX
 
 class projectile(entity):
-    def __init__(self, vel):
+    def __init__(self, vel, direction, size, damage, icon, x, y):
+        super().__init__()
+        self.x = x 
+        self.y = y
         self.vel = vel
         self.icon = None
+        self.direction = direction 
+        self.damage = damage
+        self.icon = icon
+        self.size = size
+        self.rect = pygame.Rect(self.x, self.y, self.size[0], self.size[1])
 
 class sentient(entity):
+    def __init__(self):
+        super().__init__()
+        self.projList = None
+        self.projSize = (16,16)
+        self.pVel = 5
+        self.damage = 10
+        self.pIcon = None
+        self.attackspeed = 1
+
+    def fire(self):
+        newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0], self.y + self.size[1]/2 - self.projSize[1])
+        newItem = projlist()
+        newItem.proj = newProj
+        self.projList = addtolist(self.projList, newItem)
+    
+    def checkprojcollide(self, tiletype, projectile):
+        temp = tiletype
+        while temp != None:
+            docollide = projectile.rect.colliderect(temp.tile.collbox)
+            if docollide:
+                return docollide
+            temp = temp.next
+        return False
+
+    def moveproj(self, col_list):
+        temp = self.projList
+        while temp != None: 
+            match temp.proj.direction:
+                case "UP":
+                    temp.proj.y -= temp.proj.vel
+                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, 0, -temp.proj.vel) 
+                case "DOWN":
+                    temp.proj.y += temp.proj.vel
+                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, 0, temp.proj.vel)
+                case "LEFT":
+                    temp.proj.x -= temp.proj.vel
+                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, -temp.proj.vel, 0)
+                case "RIGHT":
+                    temp.proj.x += temp.proj.vel
+                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, temp.proj.vel, 0)
+
+            if self.checkprojcollide(col_list[TILE_TYPES["impass"]], temp.proj):
+                self.projList = removefromlist(self.projList, temp.proj)
+                print("hit!")
+            else:
+                temp.proj.draw()
+            temp = temp.next
+
+    def refresh(self, col_list):
+        self.moveproj(col_list)
+        self.draw()
 
 class player(sentient):
     def __init__(self):
+        super().__init__()
         self.sVel = 1
         self.maxhealth = 1000
         self.health = self.maxhealth
@@ -150,6 +244,7 @@ class player(sentient):
         }
         self.rect = pygame.Rect(self.x+STILES[0]//4, self.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
         self.pVel = 15
+        self.pIcon = pygame.image.load(curpath+'/assets/Duck_RIGHT.png')
 
     def move(self, newdir, col_list):
         self.direction = newdir
@@ -180,23 +275,12 @@ class player(sentient):
             if self.checkcollide(col_list[TILE_TYPES["impass"]]) or self.checkcollide(col_list[TILE_TYPES["destruction"]]):
                 self.x -= self.sVel
                 self.rect = pygame.Rect.move(self.rect, -self.sVel, 0) 
-
     
-
-
-
-def addtolist(head, new):
-    if head == None:
-        return new
-    new.next = head
-    return new
-
-def outlist(head):
-    temp = head
-    while temp != None:
-        print(temp.tile.ID, temp.tile.x, temp.tile.y, temp.tile.collbox)
-        temp = temp.next
+    def draw(self):
+        self.icon = self.icons[self.direction]
+        super().draw()
         
+
 def conv_tiles_to_classes(map):
     start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
     offsetx = SWIDTH/wfc.SIZE_X
@@ -238,8 +322,8 @@ def draw_map(maplist, mapnum):
         for x in range(wfc.SIZE_X):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
-                #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
-                #   pygame.draw.rect(win, colours["red"], map[y][x].collbox)
+                if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
+                   pygame.draw.rect(win, colours["red"], map[y][x].collbox)
 
 def draw_hud(mapnum, duck, start_time):
     pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
@@ -252,10 +336,10 @@ def draw_hud(mapnum, duck, start_time):
     pygame.draw.rect(win, colours["green"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25*ratio, SHEIGHT*0.05))  
     drawtext("%s/%s" % (ceil(duck.health/10), duck.maxhealth//10), fonts["menubutton"], colours["white"], win, SWIDTH*0.7, 0)
 
-def redraw(map_list, map_num, duck, start_time):
+def redraw(map_list, map_num, duck, start_time, col_list):
     draw_hud(map_num, duck, start_time)
     draw_map(map_list, map_num)
-    duck.draw()
+    duck.refresh(col_list)
     pygame.display.update()
 
 def main_menu():
@@ -354,6 +438,10 @@ def game():
     hasWon = False
     progress = False
     newduck = player()
+    win.fill(colours["black"])
+    drawtext("Loading...", fonts["chambercard"], (255,255,255), win, SWIDTH//2-300,SHEIGHT//2-100)
+    pygame.display.update()
+    time.sleep(0.5)
     GRIDS_LIST, NUM_MAPS = wfc.generate()
     start_time = time.time()
 
@@ -379,6 +467,7 @@ def dungeon(maplist, map_num, duck, start_time):
     clock.tick(15)
     run = True
     collist = conv_tiles_to_classes(maplist[map_num])
+    prevtime = 0
     for i in range(wfc.SIZE_X):
         if maplist[map_num][wfc.SIZE_Y-1][i].ID == wfc.TILE_ID["ENTER"]:
             duck.x = maplist[map_num][wfc.SIZE_Y-1][i].x
@@ -404,6 +493,12 @@ def dungeon(maplist, map_num, duck, start_time):
         elif keys[pygame.K_DOWN]:
             duck.move("DOWN", collist)
 
+        if keys[pygame.K_SPACE]:
+            newtime = time.time()
+            if newtime-prevtime > duck.attackspeed:
+                prevtime = newtime
+                duck.fire()
+
         if duck.checkcollide(collist[TILE_TYPES["hurt"]]):
             duck.health -= 2
         if duck.checkcollide(collist[TILE_TYPES["heal"]]) and duck.health < duck.maxhealth:
@@ -411,7 +506,7 @@ def dungeon(maplist, map_num, duck, start_time):
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
 
-        redraw(maplist, map_num, duck, start_time)
+        redraw(maplist, map_num, duck, start_time,collist)
 
 if __name__ == "__main__":
     main_menu()
