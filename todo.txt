@@ -1,5 +1,8 @@
 TO DO:
 	-implement some idea of preset rooms?	[might just not]
+	-rewrite damage system for OOP
+	-finish projectile collisions 
+	-add enemies
 	-leaderboard system
 	- FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX
 ISSUES:
