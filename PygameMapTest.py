@@ -90,6 +90,9 @@ def drawtext(text, font, colour, screen, x, y): # general func displays text
     textrect.topleft = (x, y)
     screen.blit(object, textrect)
 
+def isinside(rect1, rect2):
+    return #meowww
+
 ### CLASSES ###
 
 class  centrebutton:    # class defining a rectangle button at the centre of the screen
@@ -156,7 +159,7 @@ class entity:
                 while temp != None:
                     docollide = self.rect.colliderect(temp.tile.collbox)
                     if docollide:
-                        return docollide
+                        return docollide, temp.tile
                     temp = temp.next
                 return False
 
@@ -198,9 +201,9 @@ class sentient(entity):
         while temp != None:
             docollide = projectile.rect.colliderect(temp.tile.collbox)
             if docollide:
-                return docollide
+                return docollide, temp.tile
             temp = temp.next
-        return False
+        return docollide, None
 
     def moveproj(self, col_list):
         temp = self.projList
@@ -218,14 +221,20 @@ class sentient(entity):
                 case "RIGHT":
                     temp.proj.x += temp.proj.vel
                     temp.proj.rect = pygame.Rect.move(temp.proj.rect, temp.proj.vel, 0)
-
-            if self.checkprojcollide(col_list[TILE_TYPES["impass"]], temp.proj):
+            
+            hascollided, hittile = self.checkprojcollide(col_list[TILE_TYPES["impass"]], temp.proj)
+            if hascollided:
                 self.projList = removefromlist(self.projList, temp.proj)
+                print(self.projList)
+                if hittile.ID == wfc.TILE_ID["ROCK"]:
+                    hittile.ID = wfc.TILE_ID["FLOOR"]
+                    hittile.rect = pygame.Rect(0, 0, 0, 0)
+                    col_list = removefromlist(col_list, hittile)
                 print("hit!")
             else:
                 temp.proj.draw()
             temp = temp.next
-
+        
     def refresh(self, col_list):
         self.moveproj(col_list)
         self.draw()
