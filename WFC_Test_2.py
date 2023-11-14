@@ -166,7 +166,7 @@ def create_maplist():       # creates the list of maps which will be used for th
     print("Generating %s maps...\n" % num_maps)
     for i in range(num_maps):
         maptiles = init_grid(SIZE_X, SIZE_Y)                    
-        maplist[i] = populate_grid(maptiles)     # populates from 1,1
+        maplist[i] = populate_grid(maptiles)
 
     return maplist, num_maps
 
