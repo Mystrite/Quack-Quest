@@ -173,7 +173,6 @@ class projectile(entity):
         self.x = x 
         self.y = y
         self.vel = vel
-        self.icon = None
         self.direction = direction 
         self.damage = damage
         self.icon = icon
