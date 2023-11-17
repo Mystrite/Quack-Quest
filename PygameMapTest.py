@@ -165,7 +165,7 @@ class entity:
 
     def draw(self):
             win.blit(pygame.transform.scale(self.icon, self.size), (self.x,self.y))
-            pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - HITBOX
+            #pygame.draw.rect(win, colours["red"], self.rect) # DEBUG - HITBOX
 
 class projectile(entity):
     def __init__(self, vel, direction, size, damage, icon, x, y):
@@ -251,8 +251,8 @@ class player(sentient):
             "RIGHT" : pygame.image.load(curpath+'/assets/Duck_RIGHT.png')
         }
         self.rect = pygame.Rect(self.x+STILES[0]//4, self.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
-        self.pVel = 15
-        self.pIcon = pygame.image.load(curpath+'/assets/Duck_RIGHT.png')
+        self.pVel = 5
+        self.pIcon = pygame.image.load(curpath+'/assets/player_projectile.png')
 
     def move(self, newdir, col_list):
         self.direction = newdir
@@ -330,8 +330,8 @@ def draw_map(maplist, mapnum):
         for x in range(wfc.SIZE_X):
             for y in range(wfc.SIZE_Y):
                 win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
-                if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
-                   pygame.draw.rect(win, colours["red"], map[y][x].collbox)
+                #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
+                   #pygame.draw.rect(win, colours["red"], map[y][x].collbox)
 
 def draw_hud(mapnum, duck, start_time):
     pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
