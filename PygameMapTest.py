@@ -311,7 +311,7 @@ def conv_tiles_to_classes(map):
                 newtile.collbox = pygame.Rect.move(newtile.collbox, 0, -newtile.size[1]*0.9)
                 collisionslist[TILE_TYPES["exit"]].add(newtile)
             all_tiles.add(newtile)
-    print(collisionslist)
+
     return collisionslist, all_tiles
 
 def draw_map(maplist, mapnum):
