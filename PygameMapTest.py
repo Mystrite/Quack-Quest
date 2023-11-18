@@ -176,13 +176,20 @@ class projectile(entity):
 class sentient(entity):
     def __init__(self):
         super().__init__()
-
+        self.maxhealth = 100
+        self.health = self.maxhealth
         self.projList = pygame.sprite.Group()
         self.projSize = (16,16)
         self.pVel = 5
         self.damage = 10
         self.pIcon = None
         self.attackspeed = 1
+    
+    def change_hp(self, change):
+        if self.health <= self.maxhealth:
+            self.health += change
+            if self.health > self.maxhealth: 
+                self.health = self.maxhealth
 
     def fire(self):
         newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0], self.y + self.size[1]/2 - self.projSize[1])
@@ -241,6 +248,7 @@ class player(sentient):
         self.pVel = 10
         self.pIcon = pygame.image.load(curpath+'/assets/player_projectile.png')
         self.attackspeed = 0.75
+
     def move(self, newdir, col_list):
         self.direction = newdir
         if self.direction == "UP":
@@ -270,7 +278,7 @@ class player(sentient):
             if self.checkcollide(col_list[TILE_TYPES["impass"]]):
                 self.x -= self.sVel
                 self.rect = pygame.Rect.move(self.rect, -self.sVel, 0) 
-    
+
     def draw(self):
         self.icon = self.icons[self.direction]
         super().draw()
@@ -486,10 +494,10 @@ def dungeon(maplist, map_num, duck, start_time):
                 prevtime = newtime
                 duck.fire()
 
-        if duck.checkcollide(collist[TILE_TYPES["hurt"]]):
-            duck.health -= 2
-        if duck.checkcollide(collist[TILE_TYPES["heal"]]) and duck.health < duck.maxhealth:
-            duck.health += 1
+        if duck.checkcollide(collist[TILE_TYPES["hurt"]]):  
+            duck.change_hp(-6)  # LAVA DAMAGE
+        if duck.checkcollide(collist[TILE_TYPES["heal"]]):
+            duck.change_hp(3)  # WATER HEALING
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
 
