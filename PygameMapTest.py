@@ -190,6 +190,8 @@ class sentient(entity):
             self.health += change
             if self.health > self.maxhealth: 
                 self.health = self.maxhealth
+            if self.health <= 0:
+                self.kill()
 
     def fire(self):
         newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0], self.y + self.size[1]/2 - self.projSize[1])
@@ -341,10 +343,7 @@ def redraw(map_list, map_num, duck, start_time, col_list, all_tiles):
     pygame.display.flip()
 
 def main_menu():
-    running = True
-    win.blit(misc_assets["background"], (0,0))
-
-    while running:
+    while True:
 
         mx, my = pygame.mouse.get_pos()
 
@@ -363,7 +362,7 @@ def main_menu():
                     click = True
                     
 
-        drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, SWIDTH*0.5, SHEIGHT*0.1)
+        
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
         leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
         
@@ -373,7 +372,8 @@ def main_menu():
         if leader_button.rect.collidepoint((mx, my)):
             if click:
                 leaderboard()
-
+        win.blit(misc_assets["background"], (0,0))
+        drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, SWIDTH*0.45, SHEIGHT*0.1)
         start_button.filltext("Start Game", fonts["menubutton"], colours["white"], win)
         leader_button.filltext("Leaderboard", fonts["menubutton"], colours["white"], win)
         pygame.display.update()
@@ -400,7 +400,7 @@ def name_select():
 
             if progress_button.rect.collidepoint((mx, my)):
                 if click and validname:
-                    game()
+                    running = game()
                 elif click:
                     print("invalid")
                     
@@ -455,7 +455,7 @@ def game():
             hasWon = True
         else:
             map_num += 1
-    print("yippe!")
+    return False
 
         
 
