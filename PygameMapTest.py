@@ -91,9 +91,6 @@ def drawtext(text, font, colour, screen, x, y): # general func displays text
     textrect.topleft = (x, y)
     screen.blit(object, textrect)
 
-def isinside(rect1, rect2):
-    return #meowww
-
 ### CLASSES ###
 
 class  centrebutton:    # class defining a rectangle button at the centre of the screen
@@ -140,7 +137,6 @@ class tile(pygame.sprite.Sprite):     # defines properties of any given tiles
 class entity(pygame.sprite.Sprite): 
     def __init__(self):
         super().__init__()
-
         self.x = 0
         self.y = 0
         self.sVel = 0
@@ -163,7 +159,6 @@ class entity(pygame.sprite.Sprite):
 class projectile(entity):
     def __init__(self, vel, direction, size, damage, icon, x, y):
         super().__init__()
-
         self.x = x 
         self.y = y
         self.vel = vel
@@ -222,6 +217,7 @@ class sentient(entity):
 
             hascollided, hittile = self.checkprojcollide(col_list[TILE_TYPES["impass"]], entity)
             entity.draw()
+
             if hascollided:
                 entity.kill()
                 if hittile.ID == wfc.TILE_ID["ROCK"]:
@@ -236,7 +232,6 @@ class sentient(entity):
 class player(sentient):
     def __init__(self):
         super().__init__()
-
         self.sVel = 5
         self.maxhealth = 1000
         self.health = self.maxhealth
@@ -253,6 +248,7 @@ class player(sentient):
 
     def move(self, newdir, col_list):
         self.direction = newdir
+
         if self.direction == "UP":
             self.y -= self.sVel
             self.rect = pygame.Rect.move(self.rect, 0, -self.sVel)
@@ -291,6 +287,7 @@ def conv_tiles_to_classes(map):
     offsetx = SWIDTH/wfc.SIZE_X
     offsety = offsetx
     collisionslist = [None] * len(TILE_TYPES)
+
     for i in range(len(TILE_TYPES)):
         collisionslist[i] = pygame.sprite.Group()
     all_tiles = pygame.sprite.Group()
@@ -330,7 +327,6 @@ def draw_hud(mapnum, duck, start_time):
     drawtext("Chamber %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 0, 0)
     curtime = round(time.time() - start_time, 2)
     drawtext(str(curtime), fonts["menubutton"], colours["white"], win, 0, SHEIGHT*0.05)
-
     ratio = duck.health/duck.maxhealth
     pygame.draw.rect(win, colours["red"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25, SHEIGHT*0.05))
     pygame.draw.rect(win, colours["green"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25*ratio, SHEIGHT*0.05))  
@@ -344,10 +340,9 @@ def redraw(map_list, map_num, duck, start_time, col_list, all_tiles):
 
 def main_menu():
     while True:
-
         mx, my = pygame.mouse.get_pos()
-
         click = False
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -361,8 +356,6 @@ def main_menu():
                 if event.button == 1:
                     click = True
                     
-
-        
         start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
         leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
         
