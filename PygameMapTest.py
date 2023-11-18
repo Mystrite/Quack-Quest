@@ -15,6 +15,8 @@ SHEIGHT = dispInfObj.current_h  # height of screen
 SCREEN = (SWIDTH, SHEIGHT)  # width and height stored as tuple
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)   # size of tiles tuple
 
+
+
 fontlist = pygame.font.get_fonts()
 
 colours = { # dict with reference 
@@ -144,8 +146,10 @@ class projlist:
         self.proj = None
         self.next = None
 
-class entity:
+class entity(pygame.sprite.Sprite): 
     def __init__(self):
+        super().__init__()
+
         self.x = 0
         self.y = 0
         self.sVel = 0
@@ -170,6 +174,7 @@ class entity:
 class projectile(entity):
     def __init__(self, vel, direction, size, damage, icon, x, y):
         super().__init__()
+
         self.x = x 
         self.y = y
         self.vel = vel
@@ -182,7 +187,8 @@ class projectile(entity):
 class sentient(entity):
     def __init__(self):
         super().__init__()
-        self.projList = None
+
+        self.projList = pygame.sprite.Group()
         self.projSize = (16,16)
         self.pVel = 5
         self.damage = 10
@@ -191,9 +197,7 @@ class sentient(entity):
 
     def fire(self):
         newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0], self.y + self.size[1]/2 - self.projSize[1])
-        newItem = projlist()
-        newItem.proj = newProj
-        self.projList = addtolist(self.projList, newItem)
+        self.projList.add(newProj)
     
     def checkprojcollide(self, tiletype, projectile):
         temp = tiletype
@@ -205,34 +209,26 @@ class sentient(entity):
         return docollide, None
 
     def moveproj(self, col_list):
-        temp = self.projList
-        while temp != None: 
-            match temp.proj.direction:
+        for entity in self.projList:
+            match entity.direction:
                 case "UP":
-                    temp.proj.y -= temp.proj.vel
-                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, 0, -temp.proj.vel) 
+                    entity.y -= entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, 0, -entity.vel) 
                 case "DOWN":
-                    temp.proj.y += temp.proj.vel
-                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, 0, temp.proj.vel)
+                    entity.y += entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, 0, entity.vel)
                 case "LEFT":
-                    temp.proj.x -= temp.proj.vel
-                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, -temp.proj.vel, 0)
+                    entity.x -= entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, -entity.vel, 0)
                 case "RIGHT":
-                    temp.proj.x += temp.proj.vel
-                    temp.proj.rect = pygame.Rect.move(temp.proj.rect, temp.proj.vel, 0)
+                    entity.x += entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, entity.vel, 0)
             
-            hascollided, hittile = self.checkprojcollide(col_list[TILE_TYPES["impass"]], temp.proj)
+            hascollided, hittile = self.checkprojcollide(col_list[TILE_TYPES["impass"]], entity)
+            entity.draw()
             if hascollided:
-                self.projList = removefromlist(self.projList, temp.proj)
-                print(self.projList)
-                if hittile.ID == wfc.TILE_ID["ROCK"]:
-                    hittile.ID = wfc.TILE_ID["FLOOR"]
-                    hittile.rect = pygame.Rect(0, 0, 0, 0)
-                    col_list = removefromlist(col_list, hittile)
-                print("hit!")
-            else:
-                temp.proj.draw()
-            temp = temp.next
+                entity.kill()
+
         
     def refresh(self, col_list):
         self.moveproj(col_list)
@@ -241,6 +237,7 @@ class sentient(entity):
 class player(sentient):
     def __init__(self):
         super().__init__()
+
         self.sVel = 1
         self.maxhealth = 1000
         self.health = self.maxhealth
@@ -345,7 +342,7 @@ def draw_hud(mapnum, duck, start_time):
     drawtext("%s/%s" % (ceil(duck.health/10), duck.maxhealth//10), fonts["menubutton"], colours["white"], win, SWIDTH*0.7, 0)
 
 def redraw(map_list, map_num, duck, start_time, col_list):
-    draw_hud(map_num, duck, start_time)
+    #draw_hud(map_num, duck, start_time)
     draw_map(map_list, map_num)
     duck.refresh(col_list)
     pygame.display.update()
