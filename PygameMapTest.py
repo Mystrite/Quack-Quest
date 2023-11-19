@@ -308,7 +308,7 @@ def conv_tiles_to_classes(map):
                 collisionslist[TILE_TYPES["hurt"]].add(newtile)
 
             elif newtile.ID == wfc.TILE_ID["EXIT"]:
-                newtile.collbox = pygame.Rect.move(newtile.collbox, 0, -newtile.size[1]*0.9)
+                newtile.collbox = pygame.Rect.move(newtile.collbox, 0, -newtile.size[1]*0.8)
                 collisionslist[TILE_TYPES["exit"]].add(newtile)
             all_tiles.add(newtile)
 
