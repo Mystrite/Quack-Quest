@@ -11,22 +11,24 @@ TILE_ID = {
     "EXIT": 5,
     "ENTER": 6,
     "NONE": 7,
-    "O_WALL": 8
+    "O_WALL": 8,
+    "SPAWNER": 9
 }
 
 SIZE_X = 30
 SIZE_Y = 15
 weight_matrix = [
-   # FLOOR      LAVA        HOLY        ROCK        VOID      EXIT    ENTER   NONE    O_WALL        MATRIX OF TILE WEIGHTINGS, -1 = CANNOT GENERATE
-    [500,        35,          0,        100,         75,      -1,     -1,     -1,     -1],         # FLOOR              HORIZONTAL = ORIGINAL TILE
-    [0,         350,         -1,         25,         25,      -1,     -1,     -1,     -1],         # LAVA
-    [100,        -1,        125,        350,        100,      -1,     -1,     -1,     -1],         # HOLY
-    [180,       150,         25,        250,         50,      -1,     -1,     -1,     -1],         # ROCK
-    [350,        50,         25,         25,        300,      -1,     -1,     -1,     -1],         # VOID
-    [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1],         # EXIT
-    [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1],         # ENTRANCE
-    [450,        65,          1,         60,         50,      -1,     -1,     -1,     -1],         # NONE
-    [450,        50,         15,         50,        225,      -1,     -1,     -1,     -1]          # O_WALL
+   # FLOOR      LAVA        HOLY        ROCK        VOID      EXIT    ENTER   NONE    O_WALL    SPAWNER      MATRIX OF TILE WEIGHTINGS, -1 = CANNOT GENERATE
+    [500,        35,          0,        100,         75,      -1,     -1,     -1,     -1,       20],         # FLOOR              HORIZONTAL = ORIGINAL TILE
+    [0,         350,         -1,         25,         25,      -1,     -1,     -1,     -1,       10],         # LAVA
+    [100,        -1,         -1,        450,        100,      -1,     -1,     -1,     -1,       -1],         # HOLY
+    [180,       150,         25,        250,         50,      -1,     -1,     -1,     -1,       25],         # ROCK
+    [350,        50,         15,         25,        300,      -1,     -1,     -1,     -1,       -1],         # VOID
+    [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1,       -1],         # EXIT
+    [9999,       -1,         -1,         -1,         -1,      -1,     -1,     -1,     -1,       -1],         # ENTRANCE
+    [450,        65,          0,         60,         50,      -1,     -1,     -1,     -1,        5],         # NONE
+    [450,        50,         30,         50,        225,      -1,     -1,     -1,     -1,       -1],          # O_WALL
+    [600,         0,         -1,         25,         -1,      -1,     -1,     -1,     -1,       -1]          # SPAWNER
     ]
 
 ############ VALUE PRESETS END ############
