@@ -6,5 +6,5 @@ TO DO:
 ISSUES:
 
 IDEAS:
-	- boon/bane system
+	- boon/bane system - based on tarot cards!
 	- get to choose from selection every chamber, boons are buffs, banes are debuffs (but give extra points)
