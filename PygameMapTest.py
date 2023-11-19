@@ -15,7 +15,8 @@ SHEIGHT = dispInfObj.current_h  # height of screen
 SCREEN = (SWIDTH, SHEIGHT)  # width and height stored as tuple
 STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)   # size of tiles tuple
 
-
+clock = pygame.time.Clock()
+clock.tick(60)
 
 fontlist = pygame.font.get_fonts()
 
@@ -45,7 +46,8 @@ TILE_TYPES = {  # IDs for types of tiles (e.g. damage dealing ones)
     "hurt" : 0,
     "impass" : 1,    
     "heal" : 2,
-    "exit" : 3
+    "exit" : 3,
+    "summon" : 4
 }
 
 
@@ -179,6 +181,7 @@ class sentient(entity):
         self.damage = 10
         self.pIcon = None
         self.attackspeed = 1
+        self.count = 0
     
     def change_hp(self, change):
         if self.health <= self.maxhealth:
@@ -189,7 +192,7 @@ class sentient(entity):
                 self.kill()
 
     def fire(self):
-        newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0], self.y + self.size[1]/2 - self.projSize[1])
+        newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0]/2, self.y + self.size[1]/2 - self.projSize[1])
         self.projList.add(newProj)
     
     def checkprojcollide(self, tiletype, projectile):
@@ -236,10 +239,10 @@ class player(sentient):
         self.maxhealth = 1000
         self.health = self.maxhealth
         self.icons = {
-            "UP" : pygame.image.load(curpath+'/assets/Duck_UP.png'),
-            "DOWN" : pygame.image.load(curpath+'/assets/Duck_DOWN.png'),
-            "LEFT" : pygame.image.load(curpath+'/assets/Duck_LEFT.png'),
-            "RIGHT" : pygame.image.load(curpath+'/assets/Duck_RIGHT.png')
+            "UP" : [pygame.image.load(curpath+'/assets/Duck_UP_1.png'), pygame.image.load(curpath+'/assets/Duck_UP_2.png')],
+            "DOWN" : [pygame.image.load(curpath+'/assets/Duck_DOWN_1.png'), pygame.image.load(curpath+'/assets/Duck_DOWN_2.png')],
+            "LEFT" : [pygame.image.load(curpath+'/assets/Duck_LEFT_1.png'), pygame.image.load(curpath+'/assets/Duck_LEFT_2.png')],
+            "RIGHT" : [pygame.image.load(curpath+'/assets/Duck_RIGHT_1.png'), pygame.image.load(curpath+'/assets/Duck_RIGHT_2.png')]
         }
         self.rect = pygame.Rect(self.x+STILES[0]//4, self.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
         self.pVel = 10
@@ -248,7 +251,7 @@ class player(sentient):
 
     def move(self, newdir, col_list):
         self.direction = newdir
-
+        self.count += 1
         if self.direction == "UP":
             self.y -= self.sVel
             self.rect = pygame.Rect.move(self.rect, 0, -self.sVel)
@@ -278,7 +281,8 @@ class player(sentient):
                 self.rect = pygame.Rect.move(self.rect, -self.sVel, 0) 
 
     def draw(self):
-        self.icon = self.icons[self.direction]
+        print(self.count % 2)
+        self.icon = self.icons[self.direction][self.count % 2]
         super().draw()
         
 
@@ -310,6 +314,9 @@ def conv_tiles_to_classes(map):
             elif newtile.ID == wfc.TILE_ID["EXIT"]:
                 newtile.collbox = pygame.Rect.move(newtile.collbox, 0, -newtile.size[1]*0.8)
                 collisionslist[TILE_TYPES["exit"]].add(newtile)
+
+            elif newtile.ID == wfc.TILE_ID["SPAWNER"]:
+                collisionslist[TILE_TYPES["summon"]].add(newtile)
             all_tiles.add(newtile)
 
     return collisionslist, all_tiles
