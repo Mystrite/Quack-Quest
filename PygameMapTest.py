@@ -179,7 +179,7 @@ class sentient(entity):
         self.projSize = (16,16)
         self.pVel = 5
         self.damage = 10
-        self.pIcon = None
+        self.pIcon = pygame.image.load(curpath+'/assets/projectile.png')
         self.attackspeed = 1
         self.count = 0
     
@@ -201,53 +201,6 @@ class sentient(entity):
             if docollide:
                 return docollide, tile
         return docollide, None
-
-    def moveproj(self, col_list):
-        for entity in self.projList:
-            match entity.direction:
-                case "UP":
-                    entity.y -= entity.vel
-                    entity.rect = pygame.Rect.move(entity.rect, 0, -entity.vel) 
-                case "DOWN":
-                    entity.y += entity.vel
-                    entity.rect = pygame.Rect.move(entity.rect, 0, entity.vel)
-                case "LEFT":
-                    entity.x -= entity.vel
-                    entity.rect = pygame.Rect.move(entity.rect, -entity.vel, 0)
-                case "RIGHT":
-                    entity.x += entity.vel
-                    entity.rect = pygame.Rect.move(entity.rect, entity.vel, 0)
-
-            hascollided, hittile = self.checkprojcollide(col_list[TILE_TYPES["impass"]], entity)
-            entity.draw()
-
-            if hascollided:
-                entity.kill()
-                if hittile.ID == wfc.TILE_ID["ROCK"]:
-                    hittile.remove(col_list[TILE_TYPES["impass"]])
-                    hittile.ID = wfc.TILE_ID["FLOOR"]
-                    hittile.image = pygame.transform.scale(tile_icons[hittile.ID], hittile.size)
-        
-    def refresh(self, col_list):
-        self.moveproj(col_list)
-        self.draw()
-
-class player(sentient):
-    def __init__(self):
-        super().__init__()
-        self.sVel = 5
-        self.maxhealth = 1000
-        self.health = self.maxhealth
-        self.icons = {
-            "UP" : [pygame.image.load(curpath+'/assets/Duck_UP_1.png'), pygame.image.load(curpath+'/assets/Duck_UP_2.png')],
-            "DOWN" : [pygame.image.load(curpath+'/assets/Duck_DOWN_1.png'), pygame.image.load(curpath+'/assets/Duck_DOWN_2.png')],
-            "LEFT" : [pygame.image.load(curpath+'/assets/Duck_LEFT_1.png'), pygame.image.load(curpath+'/assets/Duck_LEFT_2.png')],
-            "RIGHT" : [pygame.image.load(curpath+'/assets/Duck_RIGHT_1.png'), pygame.image.load(curpath+'/assets/Duck_RIGHT_2.png')]
-        }
-        self.rect = pygame.Rect(self.x+STILES[0]//4, self.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
-        self.pVel = 10
-        self.pIcon = pygame.image.load(curpath+'/assets/player_projectile.png')
-        self.attackspeed = 0.75
 
     def move(self, newdir, col_list):
         self.direction = newdir
@@ -280,11 +233,106 @@ class player(sentient):
                 self.x -= self.sVel
                 self.rect = pygame.Rect.move(self.rect, -self.sVel, 0) 
 
-    def draw(self):
-        print(self.count % 2)
+    def moveproj(self, col_list):
+        for entity in self.projList:
+            match entity.direction:
+                case "UP":
+                    entity.y -= entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, 0, -entity.vel) 
+                case "DOWN":
+                    entity.y += entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, 0, entity.vel)
+                case "LEFT":
+                    entity.x -= entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, -entity.vel, 0)
+                case "RIGHT":
+                    entity.x += entity.vel
+                    entity.rect = pygame.Rect.move(entity.rect, entity.vel, 0)
+
+            hascollided, hittile = self.checkprojcollide(col_list[TILE_TYPES["impass"]], entity)
+            entity.draw()
+
+            if hascollided:
+                entity.kill()
+                if hittile.ID == wfc.TILE_ID["ROCK"]:
+                    hittile.remove(col_list[TILE_TYPES["impass"]])
+                    hittile.ID = wfc.TILE_ID["FLOOR"]
+                    hittile.image = pygame.transform.scale(tile_icons[hittile.ID], hittile.size)
+        
+    def refresh(self, col_list):
+        self.moveproj(col_list)
+        self.draw()
+
+class enemy(sentient):
+    def __init__(self):
+        super().__init__()
+        self.time_since_last_attack = 0
+
+    def pathfind(self, duck_x, duck_y):
+        diff_x = duck_x - self.x 
+        diff_y = duck_y - self.y - 100
+        if abs(diff_x) > abs(diff_y):
+            if diff_x > 0:
+                self.direction = "RIGHT"
+            else:
+                self.direction = "LEFT"
+        else:
+            if diff_y > 0:
+                self.direction = "DOWN"
+            else:
+                self.direction = "UP"
+
+    def refresh(self, col_list, duck):
+        self.moveproj(col_list)
+        self.pathfind(duck.x, duck.y)
+        self.move(self.direction, col_list)
+        firetime = time.time()
+
+        if firetime - self.time_since_last_attack >= self.attackspeed:
+            self.time_since_last_attack = firetime
+            self.fire()
+
         self.icon = self.icons[self.direction][self.count % 2]
         super().draw()
-        
+
+class spider(enemy):
+    def __init__(self, x, y):
+        super().__init__()
+        self.x = x
+        self.y = y
+        self.rect = pygame.Rect(self.x+self.size[0]//4, self.y+self.size[1]//4, self.size[0]//2, self.size[1]//2)
+        self.icons = {
+            "UP" : [pygame.image.load(curpath+'/assets/spider_UP_1.png'), pygame.image.load(curpath+'/assets/spider_UP_2.png')],
+            "DOWN" : [pygame.image.load(curpath+'/assets/spider_DOWN_1.png'), pygame.image.load(curpath+'/assets/spider_DOWN_2.png')],
+            "LEFT" : [pygame.image.load(curpath+'/assets/spider_LEFT_1.png'), pygame.image.load(curpath+'/assets/spider_LEFT_2.png')],
+            "RIGHT" : [pygame.image.load(curpath+'/assets/spider_RIGHT_1.png'), pygame.image.load(curpath+'/assets/spider_RIGHT_2.png')]
+        }
+        self.attackspeed = 1
+        self.pVel = 15
+        self.sVel = 2
+        self.damage = 10 
+
+
+class player(sentient):
+    def __init__(self):
+        super().__init__()
+        self.sVel = 5
+        self.maxhealth = 1000
+        self.health = self.maxhealth
+        self.icons = {
+            "UP" : [pygame.image.load(curpath+'/assets/Duck_UP_1.png'), pygame.image.load(curpath+'/assets/Duck_UP_2.png')],
+            "DOWN" : [pygame.image.load(curpath+'/assets/Duck_DOWN_1.png'), pygame.image.load(curpath+'/assets/Duck_DOWN_2.png')],
+            "LEFT" : [pygame.image.load(curpath+'/assets/Duck_LEFT_1.png'), pygame.image.load(curpath+'/assets/Duck_LEFT_2.png')],
+            "RIGHT" : [pygame.image.load(curpath+'/assets/Duck_RIGHT_1.png'), pygame.image.load(curpath+'/assets/Duck_RIGHT_2.png')]
+        }
+        self.rect = pygame.Rect(self.x+self.size[0]//4, self.y+self.size[0]//4, self.size[1]//2, self.size[1]//2)
+        self.pVel = 10
+        self.pIcon = pygame.image.load(curpath+'/assets/projectile.png')
+        self.attackspeed = 0.75
+
+    def draw(self):
+        self.icon = self.icons[self.direction][self.count % 2]
+        super().draw()
 
 def conv_tiles_to_classes(map):
     start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
@@ -321,6 +369,29 @@ def conv_tiles_to_classes(map):
 
     return collisionslist, all_tiles
 
+def generate_enemy(enemy_group, spawners):
+    selection = random.randint(0, 0)
+    num_of_spawners = len(spawners.sprites())
+    if num_of_spawners == 0:
+        return
+
+    spawner_num = random.randint(0, num_of_spawners - 1)
+    count = 0
+
+    for selected_spawner in spawners:
+       if count == spawner_num:
+           spawner = selected_spawner
+           break
+       count += 1
+
+    match selection:
+        case 0:
+            new_enemy = spider(spawner.x, spawner.y)
+        case _:
+            print("failed")
+
+    enemy_group.add(new_enemy)
+
 def draw_map(maplist, mapnum):
     map = maplist[mapnum]
     for x in range(wfc.SIZE_X):
@@ -339,9 +410,14 @@ def draw_hud(mapnum, duck, start_time):
     pygame.draw.rect(win, colours["green"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25*ratio, SHEIGHT*0.05))  
     drawtext("%s/%s" % (ceil(duck.health/10), duck.maxhealth//10), fonts["menubutton"], colours["white"], win, SWIDTH*0.7, 0)
 
-def redraw(map_list, map_num, duck, start_time, col_list, all_tiles):
+def update_enemies(enemies, duck, col_list):
+    for entity in enemies:
+        entity.refresh(col_list, duck)
+
+def redraw(map_list, map_num, duck, start_time, col_list, all_tiles, enemies):
     draw_hud(map_num, duck, start_time)
     draw_map(map_list, map_num)
+    update_enemies(enemies, duck, col_list)
     duck.refresh(col_list)
     pygame.display.flip()
 
@@ -356,7 +432,6 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -372,6 +447,7 @@ def main_menu():
         if leader_button.rect.collidepoint((mx, my)):
             if click:
                 leaderboard()
+
         win.blit(misc_assets["background"], (0,0))
         drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, SWIDTH*0.45, SHEIGHT*0.1)
         start_button.filltext("Start Game", fonts["menubutton"], colours["white"], win)
@@ -456,18 +532,23 @@ def game():
         else:
             map_num += 1
     return False
-
-        
+    
 
 def dungeon(maplist, map_num, duck, start_time):
     run = True
     collist, all_tiles = conv_tiles_to_classes(maplist[map_num])
     prevtime = 0
+    cur_enemies = 0
+    max_enemies = random.randint(6, 8)
+    enemies = pygame.sprite.Group()
+    count = 0
+
     for tile in all_tiles:
         if tile.ID == wfc.TILE_ID["ENTER"]:
             duck.x = tile.x
             duck.y = tile.y
-            duck.rect = pygame.Rect(duck.x+STILES[0]//4, duck.y+STILES[0]//4, STILES[0]//2, STILES[1]//2)
+            duck.rect = pygame.Rect(duck.x+duck.size[0]//4, duck.y+duck.size[1]//4, duck.size[0]//2, duck.size[1]//2)
+
 
     while run:
         if duck.health <= 0:
@@ -501,7 +582,12 @@ def dungeon(maplist, map_num, duck, start_time):
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
 
-        redraw(maplist, map_num, duck, start_time, collist, all_tiles)
+        if count % 20 == 0 and random.randint(0,5) == 3 and cur_enemies < max_enemies:  # spawn enemy
+            generate_enemy(enemies, collist[TILE_TYPES["summon"]])
+            cur_enemies += 1
+
+        count += 1
+        redraw(maplist, map_num, duck, start_time, collist, all_tiles, enemies)
 
 if __name__ == "__main__":
     main_menu()
