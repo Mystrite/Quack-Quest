@@ -1,3 +1,4 @@
+from tkinter import Button
 import pygame, sys
 import random
 import WFC_Test_2 as wfc
@@ -35,11 +36,14 @@ fonts = {   # dict with fonts
 
 button_icons = { # dict with icons for buttons
     "green_forward" : pygame.image.load(curpath+'/assets/GreenArrow.png'),
-    "grey_forward"  : pygame.image.load(curpath+'/assets/GreyedGreenArrow.png')
-}
+    "grey_forward"  : pygame.image.load(curpath+'/assets/GreyedGreenArrow.png'),
+    "base_rect" : pygame.image.load(curpath+'/assets/button_back.png')
+    }
 
 misc_assets = { # dict for miscellanious assets
-    "background" : pygame.transform.scale(pygame.image.load(curpath+"/assets/background.png"), SCREEN)
+    "background" : pygame.transform.scale(pygame.image.load(curpath+"/assets/background.png"), SCREEN),
+    "chamber_card" : pygame.transform.scale(pygame.image.load(curpath+"/assets/card_background.png"), SCREEN),
+    "hearts" : pygame.image.load(curpath+"/assets/health.png")
     }
 
 TILE_TYPES = {  # IDs for types of tiles (e.g. damage dealing ones)
@@ -57,7 +61,7 @@ for id in range(len(wfc.TILE_ID)):      # loads tile assets and associates them 
 
 win = pygame.display.set_mode(SCREEN)
 
-pygame.display.set_caption("very cool epic game for cool people")
+pygame.display.set_caption("Quack Quest")
 
 clock = pygame.time.Clock()
 
@@ -102,16 +106,20 @@ class  centrebutton:    # class defining a rectangle button at the centre of the
         self.x = (SWIDTH-self.width)//2
         self.y = y
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.image = button_icons["base_rect"]
+        self.text = "Enter Name"
 
     def filltext(self, text, font, colour, win):    # fills centrebutton objetc with given text
-        pygame.draw.rect(win, colours["red"], self.rect)
+        win.blit(pygame.transform.scale(self.image, (self.width, self.height)), (self.x, self.y))
         drawtext(text, font, colour, win, self.x+self.width*0.5-(len(text)*12), (self.y)+self.height//5)
     
 
 class inputbox(centrebutton):   # creates a box inwhich player inputted text is displayed
     def filltext(self, text, font, colour, win):
-        pygame.draw.rect(win, colours["red"], self.rect)
-        drawtext(text, font, colour, win, self.x+30, (self.y)+self.height//5)
+        if self.text != "Enter Name" or text != "":
+            self.text = text
+        win.blit(pygame.transform.scale(self.image, (self.width, self.height)), (self.x, self.y))
+        drawtext(self.text, font, colour, win, self.x+30, (self.y)+self.height//5)
 
 class clickablebutton:  # defines a button which can be clicked on
     def __init__(self, x, y, size, icon): 
@@ -440,17 +448,21 @@ def draw_map(maplist, mapnum):
 def draw_hud(mapnum, duck, start_time, cur_enemies, max_enemies):
     pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
 
-    drawtext("Chamber %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 0, 0)
+    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.15*SWIDTH, 0.112*SHEIGHT)), (0,0))
+    drawtext("Chamber: %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 15, 2)
 
     curtime = round(time.time() - start_time, 2)
-    drawtext(str(curtime), fonts["menubutton"], colours["white"], win, 0, SHEIGHT*0.05)
+    drawtext("Time: %s" % curtime, fonts["menubutton"], colours["white"], win, 15, SHEIGHT*0.05)
 
     ratio = duck.health/duck.maxhealth
-    pygame.draw.rect(win, colours["red"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25, SHEIGHT*0.05))
-    pygame.draw.rect(win, colours["green"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25*ratio, SHEIGHT*0.05))  
-    drawtext("%s/%s" % (ceil(duck.health/10), duck.maxhealth//10), fonts["menubutton"], colours["white"], win, SWIDTH*0.7, 0)
+    pygame.draw.rect(win, colours["black"], (SWIDTH*0.7, 0, SWIDTH*0.3, SHEIGHT))
+    pygame.draw.rect(win, colours["red"], (SWIDTH*0.7, 0, SWIDTH*0.3*ratio, SHEIGHT))  
+    win.blit(pygame.transform.scale(misc_assets["hearts"], (SWIDTH*0.3, SHEIGHT*0.112)), (SWIDTH*0.7,0))
 
-    drawtext("%s/%s enemies slain" % (duck.slays_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, SWIDTH*0.2, 0)
+    
+
+    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.2*SWIDTH, 0.112*SHEIGHT)), (SWIDTH*0.15,0))
+    drawtext("%s/%s enemies slain" % (duck.slays_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, SWIDTH*0.16, SHEIGHT*0.015)
 
 def update_enemies(enemies, duck, col_list):
     for entity in enemies:
@@ -560,7 +572,7 @@ def game():
     start_time = time.time()
 
     while alive == True and hasWon == False:
-        win.fill(colours["black"])
+        win.blit(misc_assets["chamber_card"], (0,0))
         drawtext("Chamber %s" % str(map_num+1), fonts["chambercard"], (255,255,255), win, SWIDTH//2-300,SHEIGHT//2-100)
         pygame.display.update()
 
@@ -628,7 +640,7 @@ def dungeon(maplist, map_num, duck, start_time):
             duck.change_hp(3)  # WATER HEALING
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
-        print(count)
+
         if count % 25 == 0 and random.randint(0,5) == 3 and cur_enemies < max_enemies:  # spawn enemy
             generate_enemy(enemies, collist[TILE_TYPES["summon"]])
             cur_enemies += 1
