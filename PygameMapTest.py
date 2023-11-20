@@ -1,4 +1,3 @@
-from tkinter import Button
 import pygame, sys
 import random
 import WFC_Test_2 as wfc
@@ -43,7 +42,8 @@ button_icons = { # dict with icons for buttons
 misc_assets = { # dict for miscellanious assets
     "background" : pygame.transform.scale(pygame.image.load(curpath+"/assets/background.png"), SCREEN),
     "chamber_card" : pygame.transform.scale(pygame.image.load(curpath+"/assets/card_background.png"), SCREEN),
-    "hearts" : pygame.image.load(curpath+"/assets/health.png")
+    "hearts" : pygame.image.load(curpath+"/assets/health.png"),
+    "logo": pygame.image.load(curpath+"/assets/logo.png") 
     }
 
 TILE_TYPES = {  # IDs for types of tiles (e.g. damage dealing ones)
@@ -446,21 +446,21 @@ def draw_map(maplist, mapnum):
                 #pygame.draw.rect(win, colours["red"], map[y][x].rect)
 
 def draw_hud(mapnum, duck, start_time, cur_enemies, max_enemies):
-    pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, S_WIDTH, S_HEIGHT*0.3))
+    pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, S_WIDTH, S_HEIGHT*0.3))    # fill in background of HUD with black
 
-    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.15*S_WIDTH, 0.112*S_HEIGHT)), (0,0))
-    drawtext("Chamber: %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 15, 2)
+    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.15*S_WIDTH, 0.112*S_HEIGHT)), (0,0))    # draw background of chamber+time UI
+    drawtext("Chamber: %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 15, 2)     # write chamber number
 
     curtime = round(time.time() - start_time, 2)
-    drawtext("Time: %s" % curtime, fonts["menubutton"], colours["white"], win, 15, S_HEIGHT*0.05)
+    drawtext("Time: %s" % curtime, fonts["menubutton"], colours["white"], win, 15, S_HEIGHT*0.05)   # write current time
 
-    ratio = duck.health/duck.maxhealth
-    pygame.draw.rect(win, colours["black"], (S_WIDTH*0.7, 0, S_WIDTH*0.3, S_HEIGHT))
-    pygame.draw.rect(win, colours["red"], (S_WIDTH*0.7, 0, S_WIDTH*0.3*ratio, S_HEIGHT))  
-    win.blit(pygame.transform.scale(misc_assets["hearts"], (S_WIDTH*0.3, S_HEIGHT*0.112)), (S_WIDTH*0.7,0))
+    ratio = duck.health/duck.maxhealth      
+    pygame.draw.rect(win, colours["black"], (S_WIDTH*0.7, 0, S_WIDTH*0.3, S_HEIGHT))    # draw black background to health display
+    pygame.draw.rect(win, colours["red"], (S_WIDTH*0.7, 0, S_WIDTH*0.3*ratio, S_HEIGHT))    # draw red overlay to health display
+    win.blit(pygame.transform.scale(misc_assets["hearts"], (S_WIDTH*0.3, S_HEIGHT*0.112)), (S_WIDTH*0.7,0))     # draw transparent heart asset 
 
-    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.2*S_WIDTH, 0.112*S_HEIGHT)), (S_WIDTH*0.15,0))
-    drawtext("%s/%s enemies slain" % (duck.slays_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, S_WIDTH*0.16, S_HEIGHT*0.015)
+    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.2*S_WIDTH, 0.112*S_HEIGHT)), (S_WIDTH*0.15,0))      # draw background to enemies slain UI element
+    drawtext("%s/%s enemies slain" % (duck.slays_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, S_WIDTH*0.16, S_HEIGHT*0.015)    # draw number of enemies slain
 
 def update_enemies(enemies, duck, col_list):
     for entity in enemies:
@@ -501,7 +501,7 @@ def main_menu():
                 leaderboard()
 
         win.blit(misc_assets["background"], (0,0))
-        drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, S_WIDTH*0.45, S_HEIGHT*0.1)
+        win.blit(pygame.transform.scale_by(misc_assets["logo"], 2.5), (S_WIDTH*0.375, S_HEIGHT*0.075))
         start_button.filltext("Start Game", fonts["menubutton"], colours["white"], win)
         leader_button.filltext("Leaderboard", fonts["menubutton"], colours["white"], win)
         pygame.display.update()
