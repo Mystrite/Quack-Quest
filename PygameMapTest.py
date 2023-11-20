@@ -11,10 +11,10 @@ curpath = os.getcwd()
 
 pygame.init()
 dispInfObj = pygame.display.Info()  # resolution of screen, for debugging purposes
-SWIDTH = dispInfObj.current_w   # width of screen
-SHEIGHT = dispInfObj.current_h  # height of screen
-SCREEN = (SWIDTH, SHEIGHT)  # width and height stored as tuple
-STILES = (SWIDTH//wfc.SIZE_X, SWIDTH//wfc.SIZE_X)   # size of tiles tuple
+S_WIDTH = dispInfObj.current_w   # width of screen
+S_HEIGHT = dispInfObj.current_h  # height of screen
+SCREEN = (S_WIDTH, S_HEIGHT)  # width and height stored as tuple
+STILES = (S_WIDTH//wfc.SIZE_X, S_WIDTH//wfc.SIZE_X)   # size of tiles tuple
 
 clock = pygame.time.Clock()
 clock.tick(60)
@@ -103,7 +103,7 @@ class  centrebutton:    # class defining a rectangle button at the centre of the
     def __init__(self, width, height, y):
         self.width = width
         self.height = height
-        self.x = (SWIDTH-self.width)//2
+        self.x = (S_WIDTH-self.width)//2
         self.y = y
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.image = button_icons["base_rect"]
@@ -380,8 +380,8 @@ class player(sentient):
         super().refresh(col_list)
 
 def conv_tiles_to_classes(map):
-    start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
-    offsetx = SWIDTH/wfc.SIZE_X
+    start_y = S_HEIGHT - S_WIDTH//wfc.SIZE_X *wfc.SIZE_Y
+    offsetx = S_WIDTH/wfc.SIZE_X
     offsety = offsetx
     collisionslist = [None] * len(TILE_TYPES)
 
@@ -446,23 +446,21 @@ def draw_map(maplist, mapnum):
                 #pygame.draw.rect(win, colours["red"], map[y][x].rect)
 
 def draw_hud(mapnum, duck, start_time, cur_enemies, max_enemies):
-    pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
+    pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, S_WIDTH, S_HEIGHT*0.3))
 
-    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.15*SWIDTH, 0.112*SHEIGHT)), (0,0))
+    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.15*S_WIDTH, 0.112*S_HEIGHT)), (0,0))
     drawtext("Chamber: %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 15, 2)
 
     curtime = round(time.time() - start_time, 2)
-    drawtext("Time: %s" % curtime, fonts["menubutton"], colours["white"], win, 15, SHEIGHT*0.05)
+    drawtext("Time: %s" % curtime, fonts["menubutton"], colours["white"], win, 15, S_HEIGHT*0.05)
 
     ratio = duck.health/duck.maxhealth
-    pygame.draw.rect(win, colours["black"], (SWIDTH*0.7, 0, SWIDTH*0.3, SHEIGHT))
-    pygame.draw.rect(win, colours["red"], (SWIDTH*0.7, 0, SWIDTH*0.3*ratio, SHEIGHT))  
-    win.blit(pygame.transform.scale(misc_assets["hearts"], (SWIDTH*0.3, SHEIGHT*0.112)), (SWIDTH*0.7,0))
+    pygame.draw.rect(win, colours["black"], (S_WIDTH*0.7, 0, S_WIDTH*0.3, S_HEIGHT))
+    pygame.draw.rect(win, colours["red"], (S_WIDTH*0.7, 0, S_WIDTH*0.3*ratio, S_HEIGHT))  
+    win.blit(pygame.transform.scale(misc_assets["hearts"], (S_WIDTH*0.3, S_HEIGHT*0.112)), (S_WIDTH*0.7,0))
 
-    
-
-    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.2*SWIDTH, 0.112*SHEIGHT)), (SWIDTH*0.15,0))
-    drawtext("%s/%s enemies slain" % (duck.slays_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, SWIDTH*0.16, SHEIGHT*0.015)
+    win.blit(pygame.transform.scale(misc_assets["chamber_card"], (0.2*S_WIDTH, 0.112*S_HEIGHT)), (S_WIDTH*0.15,0))
+    drawtext("%s/%s enemies slain" % (duck.slays_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, S_WIDTH*0.16, S_HEIGHT*0.015)
 
 def update_enemies(enemies, duck, col_list):
     for entity in enemies:
@@ -492,8 +490,8 @@ def main_menu():
                 if event.button == 1:
                     click = True
                     
-        start_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
-        leader_button = centrebutton(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.65)
+        start_button = centrebutton(S_WIDTH*0.3, S_HEIGHT*0.1, S_HEIGHT*0.45)
+        leader_button = centrebutton(S_WIDTH*0.3, S_HEIGHT*0.1, S_HEIGHT*0.65)
         
         if start_button.rect.collidepoint((mx, my)):
             if click:
@@ -503,7 +501,7 @@ def main_menu():
                 leaderboard()
 
         win.blit(misc_assets["background"], (0,0))
-        drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, SWIDTH*0.45, SHEIGHT*0.1)
+        drawtext("Quack Quest", fonts["menubutton"], colours["white"], win, S_WIDTH*0.45, S_HEIGHT*0.1)
         start_button.filltext("Start Game", fonts["menubutton"], colours["white"], win)
         leader_button.filltext("Leaderboard", fonts["menubutton"], colours["white"], win)
         pygame.display.update()
@@ -512,7 +510,7 @@ def name_select():
     running = True
     name = ""
     validname = False
-    box = inputbox(SWIDTH*0.3, SHEIGHT*0.1, SHEIGHT*0.45)
+    box = inputbox(S_WIDTH*0.3, S_HEIGHT*0.1, S_HEIGHT*0.45)
     progress_button = clickablebutton((box.x + box.width + 25), box.y , (box.height, box.height), button_icons["grey_forward"])
     win.blit(misc_assets["background"], (0,0))
     while running:
@@ -565,7 +563,7 @@ def game():
     progress = False
     newduck = player()
     win.fill(colours["black"])
-    drawtext("Loading...", fonts["chambercard"], (255,255,255), win, SWIDTH//2-300,SHEIGHT//2-100)
+    drawtext("Loading...", fonts["chambercard"], (255,255,255), win, S_WIDTH//2-300,S_HEIGHT//2-100)
     pygame.display.update()
     time.sleep(0.5)
     GRIDS_LIST, NUM_MAPS = wfc.generate()
@@ -573,7 +571,7 @@ def game():
 
     while alive == True and hasWon == False:
         win.blit(misc_assets["chamber_card"], (0,0))
-        drawtext("Chamber %s" % str(map_num+1), fonts["chambercard"], (255,255,255), win, SWIDTH//2-300,SHEIGHT//2-100)
+        drawtext("Chamber %s" % str(map_num+1), fonts["chambercard"], (255,255,255), win, S_WIDTH//2-300,S_HEIGHT//2-100)
         pygame.display.update()
 
         time.sleep(3)
