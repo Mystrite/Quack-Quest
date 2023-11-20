@@ -299,8 +299,8 @@ class enemy(sentient):
             self.change_hp(-duck.damage)
             if self.health <= 0:
                 self.kill()
-                duck.kills += 1
-                duck.kills_in_chamber += 1
+                duck.slays += 1
+                duck.slays_in_chamber += 1
 
     def refresh(self, col_list, duck):
         self.do_hits(duck)
@@ -355,7 +355,7 @@ class player(sentient):
         self.pVel = 10
         self.pIcon = pygame.image.load(curpath+'/assets/projectile.png')
         self.attackspeed = 0.5
-        self.kills = 0
+        self.slays = 0
         self.animation_cycle = 0.25
 
     def do_hits(self, enemy):
@@ -450,7 +450,7 @@ def draw_hud(mapnum, duck, start_time, cur_enemies, max_enemies):
     pygame.draw.rect(win, colours["green"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25*ratio, SHEIGHT*0.05))  
     drawtext("%s/%s" % (ceil(duck.health/10), duck.maxhealth//10), fonts["menubutton"], colours["white"], win, SWIDTH*0.7, 0)
 
-    drawtext("%s/%s enemies slain" % (duck.kills_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, SWIDTH*0.2, 0)
+    drawtext("%s/%s enemies slain" % (duck.slays_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, SWIDTH*0.2, 0)
 
 def update_enemies(enemies, duck, col_list):
     for entity in enemies:
@@ -581,10 +581,14 @@ def dungeon(maplist, map_num, duck, start_time):
     collist, all_tiles = conv_tiles_to_classes(maplist[map_num])
     prevtime = 0
     cur_enemies = 0
-    max_enemies = random.randint(2, 4) + map_num
     enemies = pygame.sprite.Group()
     count = 0
-    duck.kills_in_chamber = 0
+    duck.slays_in_chamber = 0
+
+    if len(collist[TILE_TYPES["summon"]].sprites()) == 0:
+        max_enemies = 0
+    else:
+        max_enemies = random.randint(2, 4) + map_num
 
     for tile in all_tiles:
         if tile.ID == wfc.TILE_ID["ENTER"]:
@@ -624,8 +628,8 @@ def dungeon(maplist, map_num, duck, start_time):
             duck.change_hp(3)  # WATER HEALING
         if duck.checkcollide(collist[TILE_TYPES["exit"]]):
             return True
-
-        if count % 20 == 0 and random.randint(0,5) == 3 and cur_enemies < max_enemies:  # spawn enemy
+        print(count)
+        if count % 25 == 0 and random.randint(0,5) == 3 and cur_enemies < max_enemies:  # spawn enemy
             generate_enemy(enemies, collist[TILE_TYPES["summon"]])
             cur_enemies += 1
 
