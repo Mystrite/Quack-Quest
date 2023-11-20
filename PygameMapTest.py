@@ -300,6 +300,7 @@ class enemy(sentient):
             if self.health <= 0:
                 self.kill()
                 duck.kills += 1
+                duck.kills_in_chamber += 1
 
     def refresh(self, col_list, duck):
         self.do_hits(duck)
@@ -353,7 +354,7 @@ class player(sentient):
         self.rect = pygame.Rect(self.x+self.size[0]//4, self.y+self.size[0]//4, self.size[1]//2, self.size[1]//2)
         self.pVel = 10
         self.pIcon = pygame.image.load(curpath+'/assets/projectile.png')
-        self.attackspeed = 0.75
+        self.attackspeed = 0.5
         self.kills = 0
         self.animation_cycle = 0.25
 
@@ -436,22 +437,27 @@ def draw_map(maplist, mapnum):
             #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
                 #pygame.draw.rect(win, colours["red"], map[y][x].rect)
 
-def draw_hud(mapnum, duck, start_time):
+def draw_hud(mapnum, duck, start_time, cur_enemies, max_enemies):
     pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
+
     drawtext("Chamber %s" % (mapnum+1), fonts["menubutton"], colours["white"], win, 0, 0)
+
     curtime = round(time.time() - start_time, 2)
     drawtext(str(curtime), fonts["menubutton"], colours["white"], win, 0, SHEIGHT*0.05)
+
     ratio = duck.health/duck.maxhealth
     pygame.draw.rect(win, colours["red"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25, SHEIGHT*0.05))
     pygame.draw.rect(win, colours["green"], (SWIDTH*0.7, SHEIGHT*0.05, SWIDTH*0.25*ratio, SHEIGHT*0.05))  
     drawtext("%s/%s" % (ceil(duck.health/10), duck.maxhealth//10), fonts["menubutton"], colours["white"], win, SWIDTH*0.7, 0)
 
+    drawtext("%s/%s enemies slain" % (duck.kills_in_chamber, max_enemies), fonts["menubutton"], colours["white"], win, SWIDTH*0.2, 0)
+
 def update_enemies(enemies, duck, col_list):
     for entity in enemies:
         entity.refresh(col_list, duck)
 
-def redraw(map_list, map_num, duck, start_time, col_list, all_tiles, enemies):
-    draw_hud(map_num, duck, start_time)
+def redraw(map_list, map_num, duck, start_time, col_list, all_tiles, enemies, cur_enemies, max_enemies):
+    draw_hud(map_num, duck, start_time, cur_enemies, max_enemies)
     draw_map(map_list, map_num)
     update_enemies(enemies, duck, col_list)
     duck.refresh(col_list, enemies)
@@ -575,9 +581,10 @@ def dungeon(maplist, map_num, duck, start_time):
     collist, all_tiles = conv_tiles_to_classes(maplist[map_num])
     prevtime = 0
     cur_enemies = 0
-    max_enemies = random.randint(6, 8)
+    max_enemies = random.randint(2, 4) + map_num
     enemies = pygame.sprite.Group()
     count = 0
+    duck.kills_in_chamber = 0
 
     for tile in all_tiles:
         if tile.ID == wfc.TILE_ID["ENTER"]:
@@ -623,7 +630,7 @@ def dungeon(maplist, map_num, duck, start_time):
             cur_enemies += 1
 
         count += 1
-        redraw(maplist, map_num, duck, start_time, collist, all_tiles, enemies)
+        redraw(maplist, map_num, duck, start_time, collist, all_tiles, enemies, cur_enemies, max_enemies)
 
 if __name__ == "__main__":
     main_menu()
