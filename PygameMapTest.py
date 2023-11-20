@@ -63,6 +63,10 @@ win = pygame.display.set_mode(SCREEN)
 
 pygame.display.set_caption("Quack Quest")
 
+pygame.mixer.music.load(curpath+"/assets/bgm.mp3")
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1)
+
 clock = pygame.time.Clock()
 
 ### UTILITIES ###
@@ -317,13 +321,14 @@ class enemy(sentient):
         firetime = time.time()
         path_time = time.time()
 
-        if firetime - self.time_since_last_attack >= self.attackspeed:
-            self.time_since_last_attack = firetime
-            self.fire()
-        
+    
         if path_time - self.time_since_last_path >= self.path_update_time:
             self.time_since_last_path = path_time
             self.pathfind(duck.x, duck.y)
+
+        if firetime - self.time_since_last_attack >= self.attackspeed:
+                    self.time_since_last_attack = firetime
+                    self.fire()
 
         self.icon = self.icons[self.direction][self.count % 2]
         self.draw()
