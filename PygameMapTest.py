@@ -84,7 +84,7 @@ def removefromlist(head, target):
 def outlist(head):
     temp = head
     while temp != None:
-        print(temp.tile.ID, temp.tile.x, temp.tile.y, temp.tile.collbox)
+        print(temp.tile.ID, temp.tile.x, temp.tile.y, temp.tile.rect)
         temp = temp.next
 
 def drawtext(text, font, colour, screen, x, y): # general func displays text 
@@ -133,7 +133,7 @@ class tile(pygame.sprite.Sprite):     # defines properties of any given tiles
         self.y = y
         self.size = STILES
         self.image = pygame.transform.scale(tile_icons[self.ID], self.size) 
-        self.collbox = pygame.Rect(self.x, self.y, self.size[0], self.size[1]) 
+        self.rect = pygame.Rect(self.x, self.y, self.size[0], self.size[1]) 
 
 
 class entity(pygame.sprite.Sprite): 
@@ -149,7 +149,7 @@ class entity(pygame.sprite.Sprite):
 
     def checkcollide(self, tiletype):
         for tile in tiletype:
-            docollide = self.rect.colliderect(tile.collbox)
+            docollide = self.rect.colliderect(tile.rect)
             if docollide:
                 return docollide, tile
         return False
@@ -182,29 +182,36 @@ class sentient(entity):
         self.pIcon = pygame.image.load(curpath+'/assets/projectile.png')
         self.attackspeed = 1
         self.count = 0
-    
+        self.breaks = 0
+        self.animation_cycle = 0.5
+        self.last_anim = 0
+
     def change_hp(self, change):
         if self.health <= self.maxhealth:
             self.health += change
             if self.health > self.maxhealth: 
                 self.health = self.maxhealth
-            if self.health <= 0:
-                self.kill()
+
 
     def fire(self):
         newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0]/2, self.y + self.size[1]/2 - self.projSize[1])
         self.projList.add(newProj)
     
     def checkprojcollide(self, tiletype, projectile):
+        docollide = False
         for tile in tiletype:
-            docollide = projectile.rect.colliderect(tile.collbox)
+            docollide = projectile.rect.colliderect(tile.rect)
             if docollide:
                 return docollide, tile
         return docollide, None
 
     def move(self, newdir, col_list):
         self.direction = newdir
-        self.count += 1
+        new_move_time = time.time()
+        if new_move_time - self.last_anim >= self.animation_cycle:
+            self.count += 1
+            self.last_anim = new_move_time
+
         if self.direction == "UP":
             self.y -= self.sVel
             self.rect = pygame.Rect.move(self.rect, 0, -self.sVel)
@@ -258,7 +265,8 @@ class sentient(entity):
                     hittile.remove(col_list[TILE_TYPES["impass"]])
                     hittile.ID = wfc.TILE_ID["FLOOR"]
                     hittile.image = pygame.transform.scale(tile_icons[hittile.ID], hittile.size)
-        
+                    self.breaks += 1
+
     def refresh(self, col_list):
         self.moveproj(col_list)
         self.draw()
@@ -267,6 +275,8 @@ class enemy(sentient):
     def __init__(self):
         super().__init__()
         self.time_since_last_attack = 0
+        self.path_update_time = 1
+        self.time_since_last_path = 0
 
     def pathfind(self, duck_x, duck_y):
         diff_x = duck_x - self.x 
@@ -282,18 +292,32 @@ class enemy(sentient):
             else:
                 self.direction = "UP"
 
+    def do_hits(self, duck):
+        collided, hit_proj = self.checkprojcollide(duck.projList, self)
+        if collided:
+            hit_proj.kill()
+            self.change_hp(-duck.damage)
+            if self.health <= 0:
+                self.kill()
+                duck.kills += 1
+
     def refresh(self, col_list, duck):
+        self.do_hits(duck)
         self.moveproj(col_list)
-        self.pathfind(duck.x, duck.y)
         self.move(self.direction, col_list)
         firetime = time.time()
+        path_time = time.time()
 
         if firetime - self.time_since_last_attack >= self.attackspeed:
             self.time_since_last_attack = firetime
             self.fire()
+        
+        if path_time - self.time_since_last_path >= self.path_update_time:
+            self.time_since_last_path = path_time
+            self.pathfind(duck.x, duck.y)
 
         self.icon = self.icons[self.direction][self.count % 2]
-        super().draw()
+        self.draw()
 
 class spider(enemy):
     def __init__(self, x, y):
@@ -310,8 +334,9 @@ class spider(enemy):
         self.attackspeed = 1
         self.pVel = 15
         self.sVel = 2
-        self.damage = 10 
-
+        self.damage = 50
+        self.health = 25
+        self.animation_cycle = 0.25
 
 class player(sentient):
     def __init__(self):
@@ -329,10 +354,21 @@ class player(sentient):
         self.pVel = 10
         self.pIcon = pygame.image.load(curpath+'/assets/projectile.png')
         self.attackspeed = 0.75
+        self.kills = 0
+        self.animation_cycle = 0.25
 
-    def draw(self):
+    def do_hits(self, enemy):
+        collided, hit_proj = self.checkprojcollide(enemy.projList, self)
+        if collided:
+            hit_proj.kill()
+            self.change_hp(-enemy.damage)
+
+    def refresh(self, col_list, enemies):
+        for enemy in enemies:
+            self.do_hits(enemy)
+
         self.icon = self.icons[self.direction][self.count % 2]
-        super().draw()
+        super().refresh(col_list)
 
 def conv_tiles_to_classes(map):
     start_y = SHEIGHT - SWIDTH//wfc.SIZE_X *wfc.SIZE_Y
@@ -350,7 +386,7 @@ def conv_tiles_to_classes(map):
             map[y][x] = newtile
             if newtile.ID == wfc.TILE_ID["O_WALL"] or newtile.ID == wfc.TILE_ID["VOID"] or newtile.ID == wfc.TILE_ID["ENTER"] or newtile.ID == wfc.TILE_ID["ROCK"]:
                 if newtile.ID == wfc.TILE_ID["ENTER"]:
-                    newtile.collbox = pygame.Rect.move(newtile.collbox, 0, STILES[1])
+                    newtile.rect = pygame.Rect.move(newtile.rect, 0, STILES[1])
                 collisionslist[TILE_TYPES["impass"]].add(newtile)
 
             elif newtile.ID == wfc.TILE_ID["HOLY"]:
@@ -360,7 +396,7 @@ def conv_tiles_to_classes(map):
                 collisionslist[TILE_TYPES["hurt"]].add(newtile)
 
             elif newtile.ID == wfc.TILE_ID["EXIT"]:
-                newtile.collbox = pygame.Rect.move(newtile.collbox, 0, -newtile.size[1]*0.8)
+                newtile.rect = pygame.Rect.move(newtile.rect, 0, -newtile.size[1]*0.8)
                 collisionslist[TILE_TYPES["exit"]].add(newtile)
 
             elif newtile.ID == wfc.TILE_ID["SPAWNER"]:
@@ -398,7 +434,7 @@ def draw_map(maplist, mapnum):
         for y in range(wfc.SIZE_Y):
             win.blit(map[y][x].image, (map[y][x].x,map[y][x].y))
             #if map[y][x].ID == wfc.TILE_ID["O_WALL"] or map[y][x].ID == wfc.TILE_ID["VOID"] : # DEBUG - impass hitbox
-                #pygame.draw.rect(win, colours["red"], map[y][x].collbox)
+                #pygame.draw.rect(win, colours["red"], map[y][x].rect)
 
 def draw_hud(mapnum, duck, start_time):
     pygame.draw.rect(win, colours["black"], pygame.Rect(0,0, SWIDTH, SHEIGHT*0.3))
@@ -418,7 +454,7 @@ def redraw(map_list, map_num, duck, start_time, col_list, all_tiles, enemies):
     draw_hud(map_num, duck, start_time)
     draw_map(map_list, map_num)
     update_enemies(enemies, duck, col_list)
-    duck.refresh(col_list)
+    duck.refresh(col_list, enemies)
     pygame.display.flip()
 
 def main_menu():
