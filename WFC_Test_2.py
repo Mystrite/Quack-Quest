@@ -163,7 +163,7 @@ def unblock_map(grid):      # ensures exits and entrances are not directly block
     return grid
 """  
 def create_maplist():       # creates the list of maps which will be used for the game
-    num_maps = r.randint(3, 5)
+    num_maps = 1
     maplist = [None] * num_maps
     for i in range(num_maps):
         maptiles = init_grid(SIZE_X, SIZE_Y)                    

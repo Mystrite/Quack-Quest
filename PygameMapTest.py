@@ -103,6 +103,12 @@ def drawtext(text, font, colour, screen, x, y): # general func displays text
 
 ### CLASSES ###
 
+class score_record:
+    def __init__(self, name, score, time):
+        self.name = name
+        self.score = score
+        self.time = time
+
 class  centrebutton:    # class defining a rectangle button at the centre of the screen
     def __init__(self, width, height, y):
         self.width = width
@@ -206,7 +212,7 @@ class sentient(entity):
 
 
     def fire(self):
-        newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0]/2, self.y + self.size[1]/2 - self.projSize[1])
+        newProj = projectile(self.pVel, self.direction, self.projSize, self.damage, self.pIcon, self.x + self.size[0]/2 - self.projSize[0]/2, self.y + self.size[1]/2 - self.projSize[1]/2)
         self.projList.add(newProj)
     
     def checkprojcollide(self, tiletype, projectile):
@@ -355,6 +361,7 @@ class spider(enemy):
 class player(sentient):
     def __init__(self):
         super().__init__()
+        self.name = ""
         self.sVel = 5
         self.maxhealth = 1000
         self.health = self.maxhealth
@@ -418,6 +425,33 @@ def conv_tiles_to_classes(map):
             all_tiles.add(newtile)
 
     return collisionslist, all_tiles
+
+def read_from_csv(file_path, num_lines):
+    f = open(file_path, "r")
+    data = []
+
+    if num_lines == -1:
+        list_info = f.read().split("\n")
+    else:
+        list_info = [None] * num_lines
+        for i in range(num_lines):
+            list_info[i] = f.readline()
+
+    for i in range(len(list_info)):
+        record_items = list_info[i].split(",")
+        new_record = score_record(record_items[0], record_items[1], record_items[2])
+        data.append(new_record)
+
+    f.close()
+    return data
+
+def write_to_csv(file_path, record):
+    with open(file_path, "a") as f:
+        print(file_path)
+        info = record.name+","+str(record.score)+","+str(record.time)+"\n"
+        print(info)
+        f.write(info)
+
 
 def generate_enemy(enemy_group, spawners):
     selection = random.randint(0, 0)
@@ -533,7 +567,7 @@ def name_select():
 
             if progress_button.rect.collidepoint((mx, my)):
                 if click and validname:
-                    running = game()
+                    running = game(name)
                 elif click:
                     print("invalid")
                     
@@ -561,12 +595,13 @@ def leaderboard():
     print("leaderboarding!")
 
 
-def game():
+def game(name):
     map_num = 0
     alive = True
     hasWon = False
     progress = False
     newduck = player()
+    newduck.name = name
     win.fill(colours["black"])
     drawtext("Loading...", fonts["chambercard"], (255,255,255), win, S_WIDTH//2-300,S_HEIGHT//2-100)
     pygame.display.update()
@@ -588,6 +623,11 @@ def game():
             hasWon = True
         else:
             map_num += 1
+
+    if hasWon:
+        final_time = time.time() - start_time
+        victory(newduck, final_time)
+
     return False
     
 
@@ -618,7 +658,7 @@ def dungeon(maplist, map_num, duck, start_time):
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                return False
 
         keys = pygame.key.get_pressed()
 
@@ -651,6 +691,15 @@ def dungeon(maplist, map_num, duck, start_time):
         count += 1
         redraw(maplist, map_num, duck, start_time, collist, all_tiles, enemies, cur_enemies, max_enemies)
 
+def victory(duck, final_time): 
+    slay_points = duck.slays * 50 + 1000
+    break_points = duck.breaks * 5 + 250
+    time_points = 1000*(2.71**-(final_time/100) + 1)
+    sum_points = slay_points + break_points + round(time_points)
+    
+    new_record = score_record(duck.name, sum_points, final_time)
+    write_to_csv(curpath+"/A-Level-NEA-new/board.csv", new_record)
+    
 if __name__ == "__main__":
     main_menu()
 
