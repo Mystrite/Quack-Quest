@@ -698,7 +698,7 @@ def victory(duck, final_time):
     sum_points = slay_points + break_points + round(time_points)
     
     new_record = score_record(duck.name, sum_points, final_time)
-    write_to_csv(curpath+"/A-Level-NEA-new/board.csv", new_record)
+    write_to_csv(curpath+"/board.csv", new_record)
     
 if __name__ == "__main__":
     main_menu()
