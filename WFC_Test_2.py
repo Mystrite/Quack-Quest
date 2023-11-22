@@ -152,16 +152,7 @@ def populate_grid(grid):      #populate given grid
         
 
     return grid
-"""
-def unblock_map(grid):      # ensures exits and entrances are not directly blocked by non-floor tiles
-    for x in range(SIZE_X):
-        if grid[0][x] == TILE_ID["EXIT"]:
-            grid[1][x] = TILE_ID["FLOOR"]
-        if grid[SIZE_Y-1][x] == TILE_ID["ENTER"]:
-            grid[SIZE_Y-2][x] = TILE_ID["FLOOR"]
-    
-    return grid
-"""  
+
 def create_maplist():       # creates the list of maps which will be used for the game
     num_maps = r.randint(3, 5)
     maplist = [None] * num_maps

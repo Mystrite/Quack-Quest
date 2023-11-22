@@ -72,6 +72,10 @@ clock = pygame.time.Clock()
 
 ### UTILITIES ###
 
+def outrecs(arr):
+    for i in range(len(arr)):
+        print(arr[i].score)
+
 def addtolist(head, new):
     if head == None:
         return new
@@ -447,12 +451,19 @@ def read_from_csv(file_path, num_lines):
     f.close()
     return data
 
-def write_to_csv(file_path, record):
+def add_to_csv(file_path, record):
     with open(file_path, "a") as f:
         info = record.name+","+str(record.score)+","+str(record.time)+"\n"
 
         f.write(info)
 
+def overwrite_csv(file_path, records):
+    new_board = []
+    n = len(records)
+    with open(file_path, "w") as f:
+        for i in range(n):
+            new_board.append(records[i].name+","+str(records[i].score)+","+str(records[i].time)+"\n")
+        f.writelines(new_board)
 
 def generate_enemy(enemy_group, spawners):
     selection = random.randint(0, 0)
@@ -555,7 +566,7 @@ def name_select():
     win.blit(misc_assets["background"], (0,0))
     while running:
         mx, my = pygame.mouse.get_pos()
-        click = False
+        click1 = False
 
         for event in pygame.event.get():
 
@@ -564,10 +575,10 @@ def name_select():
                 sys.exit()  
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    click = True
+                    click1 = True
 
             if progress_button.rect.collidepoint((mx, my)):
-                if click and validname:
+                if click1 and validname:
                     running = game(name)
                     
             if event.type == pygame.KEYDOWN:
@@ -590,12 +601,29 @@ def name_select():
         progress_button.draw()
         pygame.display.flip()
 
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        swapped = False
+        for j in range(n-i-1):
+            if arr[j].score < arr[j+1].score or (arr[j].score == arr[j+1].score and arr[j].time > arr[j+1].time):
+                temp = arr[j]
+                arr[j] = arr[j+1]
+                arr[j+1] = temp
+                print("sortjng...")
+                swapped = True
+        if not swapped:
+            break
+
+    return arr
+
 def write_leader_entry(record, pos):
     name = record.name
     score = record.score
     time = str(round(float(record.time), 2))
     y = 100 + 50 * pos
 
+    drawtext("%s." % (pos+1), fonts["menubutton"], colours["white"], win, S_WIDTH*0.05, y )
     drawtext(name, fonts["menubutton"], colours["white"], win, S_WIDTH*0.1, y)
     drawtext(score, fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, y)
     drawtext(time, fonts["menubutton"], colours["white"], win, S_WIDTH*0.5, y)
@@ -605,9 +633,12 @@ def leaderboard():
     top_players = read_from_csv(curpath+"/board.csv", top_n)
     running = True
     win.blit(misc_assets["chamber_card"], (0,0))
+    drawtext("#", fonts["menubutton"], colours["white"], win, S_WIDTH*0.05, 50)
     drawtext("NAME", fonts["menubutton"], colours["white"], win, S_WIDTH*0.1, 50)
     drawtext("SCORE", fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, 50)
     drawtext("TIME", fonts["menubutton"], colours["white"], win, S_WIDTH*0.5, 50)
+
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -719,13 +750,93 @@ def dungeon(maplist, map_num, duck, start_time):
         redraw(maplist, map_num, duck, start_time, collist, all_tiles, enemies, cur_enemies, max_enemies)
 
 def victory(duck, final_time): 
-    slay_points = duck.slays * 50 + 1000
-    break_points = duck.breaks * 5 + 250
-    time_points = 1000*(2.71**-(final_time/100) + 1)
-    sum_points = slay_points + break_points + round(time_points)
+    continue_button = centrebutton(S_WIDTH*0.3, S_HEIGHT*0.1, S_HEIGHT*0.75)
+
+    slay_points = duck.slays * 65 + 1000
+    break_points = duck.breaks * 8 + 250
+    time_points = round(1000*(2.71**-(final_time/100) + 1))
+    sum_points = slay_points + break_points + time_points
     
     new_record = score_record(duck.name, sum_points, final_time)
-    write_to_csv(curpath+"/board.csv", new_record)
+    add_to_csv(curpath+"/board.csv", new_record)
+
+    whole_board = read_from_csv(curpath+"/board.csv", -1)
+    outrecs(whole_board)
+    whole_board = bubble_sort(whole_board)
+    outrecs(whole_board)
+    overwrite_csv(curpath+"/board.csv", whole_board)
+    final_time = round(final_time, 2)
+    run = True
+
+    interval = 21
+
+    for i in range(slay_points+1):
+        if i % interval == 0:
+            win.blit(misc_assets["chamber_card"], (0,0))
+            drawtext("VICTORY!", fonts["chambercard"], colours["white"], win, S_WIDTH*0.355, S_HEIGHT*0.05)
+            drawtext("ENEMIES SLAIN"+" " * 15 + str(i), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.15)
+
+            pygame.display.update()
+
+    for i in range(break_points+1):
+        if i % interval == 0:
+            win.blit(misc_assets["chamber_card"], (0,0))
+            drawtext("VICTORY!", fonts["chambercard"], colours["white"], win, S_WIDTH*0.355, S_HEIGHT*0.05)
+            drawtext("ENEMIES SLAIN"+" " * 15 + str(slay_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.15)
+            drawtext("DESTRUCTION"+" " * 17 + str(i), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.20)
+            pygame.display.update()
+
+    for i in range(time_points+1):
+        if i % interval == 0:
+            win.blit(misc_assets["chamber_card"], (0,0))
+            drawtext("VICTORY!", fonts["chambercard"], colours["white"], win, S_WIDTH*0.355, S_HEIGHT*0.05)
+            drawtext("ENEMIES SLAIN"+" " * 15 + str(slay_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.15)
+            drawtext("DESTRUCTION"+" " * 17 + str(break_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.20)
+            drawtext("TIME"+" " * 34 + str(i), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.25)
+            drawtext("FINAL TIME"+ " " * 22 + str(final_time), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.30)
+            pygame.display.update()
+
+    for i in range(sum_points+1):
+        if i % interval == 0:
+            win.blit(misc_assets["chamber_card"], (0,0))
+            drawtext("VICTORY!", fonts["chambercard"], colours["white"], win, S_WIDTH*0.355, S_HEIGHT*0.05)
+            drawtext("ENEMIES SLAIN"+" " * 15 + str(slay_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.15)
+            drawtext("DESTRUCTION"+" " * 17 + str(break_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.20)
+            drawtext("TIME"+" " * 34 + str(time_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.25)
+            drawtext("FINAL TIME"+ " " * 22 + str(final_time), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.30)
+            drawtext("TOTAL POINTS"+" " * 15 + str(i), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.45)
+            pygame.display.update()
+
+
+    while run:
+        mx, my = pygame.mouse.get_pos()
+        click = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        if continue_button.rect.collidepoint((mx, my)):
+            if click:
+                run = False
+
+        win.blit(misc_assets["chamber_card"], (0,0))
+        drawtext("VICTORY!", fonts["chambercard"], colours["white"], win, S_WIDTH*0.355, S_HEIGHT*0.05)
+        drawtext("ENEMIES SLAIN"+" " * 15 + str(slay_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.15)
+        drawtext("DESTRUCTION"+" " * 17 + str(break_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.20)
+        drawtext("TIME"+" " * 34 + str(time_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.25)
+        drawtext("FINAL TIME"+ " " * 22 + str(final_time), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.30)
+        drawtext("TOTAL POINTS"+" " * 15 + str(sum_points), fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, S_HEIGHT*0.45)
+        continue_button.filltext("Continue", fonts["menubutton"], colours["white"], win)
+
+        pygame.display.update()
     
 if __name__ == "__main__":
     main_menu()
