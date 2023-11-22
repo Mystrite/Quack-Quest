@@ -610,7 +610,6 @@ def bubble_sort(arr):
                 temp = arr[j]
                 arr[j] = arr[j+1]
                 arr[j+1] = temp
-                print("sortjng...")
                 swapped = True
         if not swapped:
             break
@@ -761,9 +760,7 @@ def victory(duck, final_time):
     add_to_csv(curpath+"/board.csv", new_record)
 
     whole_board = read_from_csv(curpath+"/board.csv", -1)
-    outrecs(whole_board)
     whole_board = bubble_sort(whole_board)
-    outrecs(whole_board)
     overwrite_csv(curpath+"/board.csv", whole_board)
     final_time = round(final_time, 2)
     run = True
