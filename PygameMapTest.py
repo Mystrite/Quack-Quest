@@ -1,3 +1,4 @@
+from tkinter import TOP
 import pygame, sys
 import random
 import WFC_Test_2 as wfc
@@ -589,11 +590,24 @@ def name_select():
         progress_button.draw()
         pygame.display.flip()
 
+def write_leader_entry(record, pos):
+    name = record.name
+    score = record.score
+    time = str(round(float(record.time), 2))
+    y = 100 + 50 * pos
+
+    drawtext(name, fonts["menubutton"], colours["white"], win, S_WIDTH*0.1, y)
+    drawtext(score, fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, y)
+    drawtext(time, fonts["menubutton"], colours["white"], win, S_WIDTH*0.5, y)
+
 def leaderboard():
-    top_n = 10
-    top_players = read_from_csv(curpath+"/board.csv", -1)
+    top_n = 18
+    top_players = read_from_csv(curpath+"/board.csv", top_n)
     running = True
-    win.blit(misc_assets["background"], (0,0))
+    win.blit(misc_assets["chamber_card"], (0,0))
+    drawtext("NAME", fonts["menubutton"], colours["white"], win, S_WIDTH*0.1, 50)
+    drawtext("SCORE", fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, 50)
+    drawtext("TIME", fonts["menubutton"], colours["white"], win, S_WIDTH*0.5, 50)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -604,7 +618,8 @@ def leaderboard():
                     running = False
 
         for i in range(len(top_players)):
-            drawtext(top_players[i].name, fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, 50+50*i)
+            write_leader_entry(top_players[i], i)
+
         pygame.display.flip()
 
 def game(name):
