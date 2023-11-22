@@ -439,17 +439,17 @@ def read_from_csv(file_path, num_lines):
 
     for i in range(len(list_info)):
         record_items = list_info[i].split(",")
-        new_record = score_record(record_items[0], record_items[1], record_items[2])
-        data.append(new_record)
+        if len(record_items) == 3:
+            new_record = score_record(record_items[0], record_items[1], record_items[2])
+            data.append(new_record)
 
     f.close()
     return data
 
 def write_to_csv(file_path, record):
     with open(file_path, "a") as f:
-        print(file_path)
         info = record.name+","+str(record.score)+","+str(record.time)+"\n"
-        print(info)
+
         f.write(info)
 
 
@@ -568,8 +568,6 @@ def name_select():
             if progress_button.rect.collidepoint((mx, my)):
                 if click and validname:
                     running = game(name)
-                elif click:
-                    print("invalid")
                     
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -592,8 +590,22 @@ def name_select():
         pygame.display.flip()
 
 def leaderboard():
-    print("leaderboarding!")
+    top_n = 10
+    top_players = read_from_csv(curpath+"/board.csv", -1)
+    running = True
+    win.blit(misc_assets["background"], (0,0))
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
 
+        for i in range(len(top_players)):
+            drawtext(top_players[i].name, fonts["menubutton"], colours["white"], win, S_WIDTH*0.35, 50+50*i)
+        pygame.display.flip()
 
 def game(name):
     map_num = 0
