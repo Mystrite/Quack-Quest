@@ -1,4 +1,3 @@
-
 import pygame, sys
 import random
 import WFC as wfc
