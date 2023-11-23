@@ -1,7 +1,7 @@
-from tkinter import TOP
+
 import pygame, sys
 import random
-import WFC_Test_2 as wfc
+import WFC as wfc
 import re
 import time
 import os
@@ -753,7 +753,7 @@ def victory(duck, final_time):
 
     slay_points = duck.slays * 65 + 1000
     break_points = duck.breaks * 8 + 250
-    time_points = round(1000*(2.71**-(final_time/100) + 1))
+    time_points = round(1000*(2.72**-(final_time/100) + 1))
     sum_points = slay_points + break_points + time_points
     
     new_record = score_record(duck.name, sum_points, final_time)
