@@ -4,7 +4,6 @@ import WFC as wfc
 import re
 import time
 import os
-from math import ceil
 
 curpath = os.getcwd()
 
