@@ -394,6 +394,8 @@ class player(sentient):
         self.icon = self.icons[self.direction][self.count % 2]
         super().refresh(col_list)
 
+### MAIN FUNCS ###
+
 def conv_tiles_to_classes(map):
     start_y = S_HEIGHT - S_WIDTH//wfc.SIZE_X *wfc.SIZE_Y
     offsetx = S_WIDTH/wfc.SIZE_X
